@@ -2,7 +2,9 @@
 
 import { setupDevtoolsPlugin } from '@vue/devtools-api'
 import { ref, useSlots } from 'vue'
-import { SharedData, isChrome, BridgeEvents } from '@vue-devtools/shared-utils'
+//import { SharedData, isChrome, BridgeEvents } from '@vue-devtools/shared-utils'
+import { isChrome } from './utils/env'
+import { BridgeEvents } from './utils/bridge'
 import { getBridge, useBridge } from './features/bridge'
 
 function inspectDOM (id) {
