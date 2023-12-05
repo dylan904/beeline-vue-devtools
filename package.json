@@ -9,9 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@vue/devtools": "^6.5.1",
-    "@vue-devtools/shared-utils": "https://gitpkg.now.sh/vuejs/devtools/packages/shared-utils?main",
-    "@vue-devtools/app-frontend": "https://gitpkg.now.sh/vuejs/devtools/packages/app-frontend?main"
+    "@vue/devtools": "^6.5.1"
   },
   "devDependencies": {
     
