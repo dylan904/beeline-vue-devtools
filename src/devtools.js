@@ -3,7 +3,7 @@
 import { setupDevtoolsPlugin } from '@vue/devtools-api'
 import { ref, useSlots } from 'vue'
 import { SharedData, isChrome, BridgeEvents } from '@vue-devtools/shared-utils'
-import { getBridge, useBridge } from '@front/features/bridge'
+import { getBridge, useBridge } from '@vue-devtools/packages/app-frontend/features/bridge'
 
 function inspectDOM (id) {
   if (!id) return
