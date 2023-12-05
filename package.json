@@ -8,7 +8,10 @@
   },
   "author": "",
   "license": "ISC",
-  "devDependencies": {
+  "dependencies": {
     "@vue/devtools": "^6.5.1"
+  },
+  "devDependencies": {
+    
   }
 }
