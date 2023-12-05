@@ -7,7 +7,7 @@ import { isChrome } from './utils/env'
 import { BridgeEvents } from './utils/consts'
 import { getBridge, useBridge } from './features/bridge'
 
-export { testAccessibility } from './utils/testAccessibility'
+export { auditAccessibility } from './utils/auditAccessibility'
 
 function inspectDOM (id) {
   if (!id) return
