@@ -107,7 +107,7 @@ async function openInEditor (file) {
   }
 }
 
-const compEls = ref({ value: [] })
+export const compEls = ref({ value: [] })
 
 function getClosestComponentInstance (vEl) {
   if (vEl.__vueParentComponent) {
@@ -140,7 +140,7 @@ function closestAncestor (el, candidateComponents) {
   return null
 }
 
-export default {
+export const DevtoolsPlugin = {
   install: (app) => {
     app.provide('componentEls', compEls)
     setupDevtoolsPlugin({
@@ -153,18 +153,9 @@ export default {
       const componentInstances = await api.getComponentInstances(app)
       window.componentInstances = componentInstances
       let violators = []
-      for (const instance of componentInstances) {
-        const componentFile = instance.type.__file
-        if (componentFile) {
-          console.log('componentInstance9', instance.subTree.el, componentFile, instance)
-
-          if (componentFile === 'src/FormSection.vue') {
-            console.log('findme', instance.ctx.$slots.default()[0], instance.slots.default()[0], instance.vnode.el, instance)
-          }
-        }
-      }
-
       const relevantComponentInstances = componentInstances.filter(instance => instance.type.__file && instance.subTree.el.nodeType === 1)
+
+      console.log('wintest', window);
 
       compEls.value = relevantComponentInstances.map(instance => instance.subTree.el)
 
