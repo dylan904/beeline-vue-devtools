@@ -273,13 +273,6 @@ export const DevtoolsPlugin = {
         }
       })
 
-      api.on.inspectComponent(payload => {
-        console.log('dbd- INSPECT', payload, window.violations)
-        if (payload.instanceData) {
-          console.log('dbd- INSPECT2', payload)
-        }
-      })
-
       api.on.getInspectorState(payload => {
         if (payload.inspectorId === 'test-inspector') {
           console.log('nodeid', payload.nodeId, violators)
@@ -292,7 +285,7 @@ export const DevtoolsPlugin = {
               nodeId = payload.nodeId.split('-')[0]
               const violation = getViolation(payload.nodeId, violators)
               if (!violation) {
-                console.error('no matching violation found', payload.nodeId)
+                console.error('no matching violation found', payload.nodeId, violators, window.violations)
                 return
               }
               payload.state = {
@@ -335,19 +328,6 @@ export const DevtoolsPlugin = {
               ],
             }
           }
-        }
-      })
-
-      api.on.visitComponentTree((payload, ctx) => {
-        const node = payload.treeNode
-        console.log('dbd- VISIT', node, ctx)
-        console.log('dbd- wait')
-        if (node.name === 'MyApp') {
-          setTimeout(() => {
-            const result = api.selectInspectorNode('components', 'myapp:3242')
-
-            console.log('dbd- try', result)
-          }, 1000)
         }
       })
 
