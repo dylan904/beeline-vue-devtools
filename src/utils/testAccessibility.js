@@ -29,7 +29,7 @@ function getClosestComponent(vEl) {
     return null
   }
 
-function testAudit() {
+export default function testAccessibility() {
     console.log('test')
     const script = document.createElement("script");
     script.src = 'https://cdnjs.cloudflare.com/ajax/libs/axe-core/4.8.2/axe.min.js';
