@@ -6,6 +6,7 @@ import { ref, useSlots } from 'vue'
 import { isChrome } from './utils/env'
 import { BridgeEvents } from './utils/consts'
 import { getBridge, useBridge } from './features/bridge'
+import testAccessibility from '.utils/testAccessibility'
 
 function inspectDOM (id) {
   if (!id) return
@@ -106,6 +107,8 @@ async function openInEditor (file) {
     throw err
   }
 }
+
+export testAccessibility;
 
 export const compEls = ref({ value: [] })
 
