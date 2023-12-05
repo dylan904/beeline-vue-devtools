@@ -1,5 +1,6 @@
 import { onUnmounted } from 'vue'
-import { Bridge, BridgeEvents } from '@vue-devtools/shared-utils'
+import { BridgeEvents } from '../utils/consts'
+import { Bridge } from '@vue-devtools/shared-utils'
 
 let bridge: Bridge
 
