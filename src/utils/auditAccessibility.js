@@ -15,9 +15,9 @@ function getClosestComponent(vEl) {
       console.log('default')
       return { uid: -1, type: { name: 'ROOT' } }
     }
-  }
+}
   
-  function closestAncestor(el, candidateParents) {
+function closestAncestor(el, candidateParents) {
     while (el) {
       for (const candidate of candidateParents) {
         if (candidate === el) {
@@ -27,7 +27,7 @@ function getClosestComponent(vEl) {
       el = el.parentElement
     }
     return null
-  }
+}
 
 export function auditAccessibility(compEls) {
     console.log('test', compEls)
@@ -42,35 +42,27 @@ export function auditAccessibility(compEls) {
         console.log('try4?')
         const result = await axe.run()
 
-        const int = setInterval(() => {
-            const componentEls = compEls.value;
-            console.log('check', !!componentEls)
-            if (componentEls) {
-            clearInterval(int)
-
-            for (const violation of result.violations) {
-                for (const node of violation.nodes) {
-                    const vEl = document.body.querySelector(node.target[0])
-                    //console.log('try closest', node.target, vEl, componentEls)
-                    const closestComponent = closestAncestor(vEl, componentEls)
-                    const otherClosestComponent = getClosestComponent(vEl);
-                    console.log({ closestComponent, otherClosestComponent })
-                    if (!closestComponent)
-                        console.log('failtofind', vEl, violation)
-                    //else if (closestComponent !== otherClosestComponent)
-                    //    console.error('not matching closest component', vEl.__vueParentComponent, closestComponent)
-                    else
-                        console.log('closest', vEl, closestComponent, violation)
-                    }
-                }
+    for (const violation of result.violations) {
+        for (const node of violation.nodes) {
+            const vEl = document.body.querySelector(node.target[0])
+            //console.log('try closest', node.target, vEl, compEls)
+            const closestComponent = closestAncestor(vEl, compEls)
+            const otherClosestComponent = getClosestComponent(vEl);
+            console.log({ closestComponent, otherClosestComponent })
+            if (!closestComponent)
+                console.log('failtofind', vEl, violation)
+            //else if (closestComponent !== otherClosestComponent)
+            //    console.error('not matching closest component', vEl.__vueParentComponent, closestComponent)
+            else
+                console.log('closest', vEl, closestComponent, violation)
             }
-        }, 50);
+        }
 
         window.violations = result.violations
         console.log(result.violations)
         //console.log('violations', result.violations[0].nodes[6].target[0])
         
-        resolve({ result, componentEls: compEls.value })
+        resolve({ result, compEls })
         }
         
     })
