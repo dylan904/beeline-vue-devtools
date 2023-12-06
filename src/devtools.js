@@ -272,12 +272,14 @@ export const DevtoolsPlugin = {
 
           payload.rootNodes = violators
           pending = false;
+          console.log('done.', new Date().getTime())
         }
       })
 
       api.on.getInspectorState(payload => {
         if (payload.inspectorId === 'test-inspector') {
-          console.log('nodeid', {pending}, payload.nodeId, violators)
+          
+          console.log('nodeid', {pending}, new Date().getTime(), payload.nodeId, violators)
           if (typeof payload.nodeId === 'string') {
             let nodeId
             if (payload.nodeId.includes('instance')) {
