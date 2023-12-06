@@ -232,7 +232,7 @@ export const DevtoolsPlugin = {
                   ],
                 })
               } else {
-                // violator.children.push(uniqueViolation)
+                console.log('pushit', uniqueViolation, instanceViolation)
 
                 const existingInstanceViolation = violator.children.find(v => Number(v.id.split('-')[2]) === uid)
                 if (existingInstanceViolation) {
