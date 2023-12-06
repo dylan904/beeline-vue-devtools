@@ -32,7 +32,7 @@ function tallyOccurence(existingInstanceViolation, existingUniqueViolation) {
     }
     else {
       
-      tag.label = 'x' + existingInstanceViolation.occurences
+      tag.label = 'x' + existingUniqueViolation.occurences
     }
   }
 }
