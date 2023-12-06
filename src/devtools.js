@@ -21,6 +21,7 @@ function tallyOccurance(existingInstanceViolation, violation) {
   const existingUniqueViolation = existingInstanceViolation.children.find(child => child.label === violation.id)
   if (existingUniqueViolation) {
     ++existingInstanceViolation.occurences
+    const tag = existingUniqueViolation.tags.find(tag => tag.isOccurences)
     console.log('tallycheck1', existingInstanceViolation.occurences, tag)
     if (existingInstanceViolation.occurences === 2) {
       existingUniqueViolation.tags.push({
