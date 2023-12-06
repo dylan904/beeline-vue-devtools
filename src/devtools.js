@@ -26,7 +26,7 @@ function getViolatingComponents (id, violators, componentInstances) {
   }
 }
 
-async function getViolators() {
+async function getViolators(relevantComponentInstances) {
   const doc = window.document
   let violators = []
   const impactBGMap = {
@@ -251,7 +251,7 @@ export const DevtoolsPlugin = {
       window.componentInstances = componentInstances
       const relevantComponentInstances = componentInstances.filter(instance => instance.type.__file && instance.subTree.el.nodeType === 1)
       
-      let violators = await getViolators()
+      let violators = await getViolators(relevantComponentInstances)
       console.log('instances', componentInstances, violators);
       let pending = true
 
