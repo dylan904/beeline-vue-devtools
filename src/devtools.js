@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 
 import { setupDevtoolsPlugin } from '@vue/devtools-api'
-import { ref, useSlots } from 'vue'
-//import { SharedData, isChrome, BridgeEvents } from '@vue-devtools/shared-utils'
+import { ref } from 'vue'
 import { isChrome } from './utils/env'
 import { BridgeEvents } from './utils/consts'
 import { getBridge, useBridge } from './features/bridge'
@@ -18,19 +17,6 @@ function inspectDOM (id) {
   }
 }
 
-function getVNodes (el, output = {}) {
-  for (const child of el.children) {
-    const vNode = child.__vnode
-    const type = vNode.type
-    if (!output.hasOwnProperty(type)) {
-      output[type] = []
-    }
-    output[type].push(vNode)
-    getVNodes(child, output)
-  }
-  return output
-}
-
 function getViolatingComponents (id, violators, componentInstances) {
   const components = []
   for (const violator of violators) {
@@ -38,6 +24,115 @@ function getViolatingComponents (id, violators, componentInstances) {
       return violator.children.map(child => componentInstances.find(instance => instance.uid === child.uid))
     }
   }
+}
+
+async function getViolators() {
+  const doc = window.document
+  let violators = []
+  const impactBGMap = {
+    critical: 0xfc1c03,
+    serious: 0xff6a0d,
+    moderate: 0xfcf403,
+    minor: 0xc9c8c7,
+  }
+  const impactTextMap = {
+    critical: 0xFFFFFF,
+    serious: 0xFFFFFF,
+    moderate: 0x000000,
+    minor: 0x000000,
+  }
+
+  if (!relevantComponentInstances) {
+    console.error('No component Els...')
+    return
+  }
+  if (!window.violations) {
+    console.error('No violations...')
+    return
+  }
+
+  window.console.log('testme', window.violations)
+
+  for (const violation of window.violations) {
+    for (const node of violation.nodes) {
+      const vEl = doc.querySelector(node.target[0])
+      if (!vEl) {
+        console.log('wtf', node, violation)
+      }
+      // const closestComponentInstance = closestAncestor(vEl, relevantComponentInstances) || { uid: -1, type: { name: 'ROOT' } }
+      const closestComponentInstance = getClosestComponentInstance(vEl)
+      const componentName = await api.getComponentName(closestComponentInstance)
+      const uid = closestComponentInstance.uid
+      const random = Math.floor(Math.random() * (9999 - 1000 + 1) + 1000)
+
+      const uniqueViolation = {
+        id: uid + '-' + random + '-' + violation.id,
+        uid: uid,
+        label: violation.id,
+        tags: [
+          {
+            label: violation.impact,
+            textColor: impactTextMap[violation.impact],
+            backgroundColor: impactBGMap[violation.impact],
+          },
+        ],
+      }
+
+      console.log('testthis', componentName, closestComponentInstance, node.html, vEl, violation)
+
+      const violator = violators.find(violator => violator.name === componentName)
+      const instanceId = 'instance-' + random + '-' + uid
+      const instanceViolation = {
+        id: instanceId,
+        children: [
+          uniqueViolation,
+        ],
+      }
+
+      if (!violator) {
+        if (!componentName) {
+          console.log('noname?', closestComponentInstance)
+        }
+        instanceViolation.label = 'Instance #1'
+        violators.push({
+          id: uid,
+          name: componentName,
+          instanceIds: [uid],
+          label: '<' + componentName + '>',
+          color: 0xFF0000,
+          textColor: 0x00FF00,
+          children: [
+            instanceViolation,
+          ],
+        })
+      } else {
+        // violator.children.push(uniqueViolation)
+
+        const existingInstanceViolation = violator.children.find(v => Number(v.id.split('-')[2]) === uid)
+        if (existingInstanceViolation) {
+          existingInstanceViolation.children.push(uniqueViolation)
+        } else {
+          violator.children.push(instanceViolation)
+        }
+        instanceViolation.label = 'Instance #' + violator.children.length
+      }
+    }
+  }
+
+  console.log('checkviolators', violators)
+
+  console.log('sorteddd', violators.sort((a, b) => {
+    const aScore = a.children.reduce(getViolationSortScore, 0)
+    a.score = aScore
+    const bScore = b.children.reduce(getViolationSortScore, 0)
+    b.score = bScore
+    console.log('sortscore', aScore, bScore, a, b)
+    return bScore - aScore
+  }))
+
+  pending = false;
+  console.log('done.', new Date().getTime())
+  return violators;
 }
 
 const violationSortScoreScale = {
@@ -155,7 +250,7 @@ export const DevtoolsPlugin = {
       const componentInstances = await api.getComponentInstances(app)
       window.componentInstances = componentInstances
       console.log('instances', componentInstances);
-      let violators = []
+      let violators = getViolators()
       let pending = true
       const relevantComponentInstances = componentInstances.filter(instance => instance.type.__file && instance.subTree.el.nodeType === 1)
 
@@ -167,112 +262,7 @@ export const DevtoolsPlugin = {
 
       api.on.getInspectorTree(async payload => {
         if (payload.inspectorId === 'test-inspector') {
-          const doc = window.document
-          violators = []
-          const impactBGMap = {
-            critical: 0xfc1c03,
-            serious: 0xff6a0d,
-            moderate: 0xfcf403,
-            minor: 0xc9c8c7,
-          }
-          const impactTextMap = {
-            critical: 0xFFFFFF,
-            serious: 0xFFFFFF,
-            moderate: 0x000000,
-            minor: 0x000000,
-          }
-
-          if (!relevantComponentInstances) {
-            console.error('No component Els...')
-            return
-          }
-          if (!window.violations) {
-            console.error('No violations...')
-            return
-          }
-
-          window.console.log('testme', window.violations)
-
-          for (const violation of window.violations) {
-            for (const node of violation.nodes) {
-              const vEl = doc.querySelector(node.target[0])
-              if (!vEl) {
-                console.log('wtf', node, violation)
-              }
-              // const closestComponentInstance = closestAncestor(vEl, relevantComponentInstances) || { uid: -1, type: { name: 'ROOT' } }
-              const closestComponentInstance = getClosestComponentInstance(vEl)
-              const componentName = await api.getComponentName(closestComponentInstance)
-              const uid = closestComponentInstance.uid
-              const random = Math.floor(Math.random() * (9999 - 1000 + 1) + 1000)
-
-              const uniqueViolation = {
-                id: uid + '-' + random + '-' + violation.id,
-                uid: uid,
-                label: violation.id,
-                tags: [
-                  {
-                    label: violation.impact,
-                    textColor: impactTextMap[violation.impact],
-                    backgroundColor: impactBGMap[violation.impact],
-                  },
-                ],
-              }
-
-              console.log('testthis', componentName, closestComponentInstance, node.html, vEl, violation)
-
-              const violator = violators.find(violator => violator.name === componentName)
-              const instanceId = 'instance-' + random + '-' + uid
-              const instanceViolation = {
-                id: instanceId,
-                children: [
-                  uniqueViolation,
-                ],
-              }
-
-              if (!violator) {
-                if (!componentName) {
-                  console.log('noname?', closestComponentInstance)
-                }
-                instanceViolation.label = 'Instance #1'
-                violators.push({
-                  id: uid,
-                  name: componentName,
-                  instanceIds: [uid],
-                  label: '<' + componentName + '>',
-                  color: 0xFF0000,
-                  textColor: 0x00FF00,
-                  children: [
-                    instanceViolation,
-                  ],
-                })
-              } else {
-                // violator.children.push(uniqueViolation)
-
-                const existingInstanceViolation = violator.children.find(v => Number(v.id.split('-')[2]) === uid)
-                if (existingInstanceViolation) {
-                  existingInstanceViolation.children.push(uniqueViolation)
-                } else {
-                  violator.children.push(instanceViolation)
-                }
-                instanceViolation.label = 'Instance #' + violator.children.length
-              }
-            }
-          }
-
-          console.log('checkviolators', violators)
-
-          console.log('sorteddd', violators.sort((a, b) => {
-            const aScore = a.children.reduce(getViolationSortScore, 0)
-            a.score = aScore
-            const bScore = b.children.reduce(getViolationSortScore, 0)
-            b.score = bScore
-            console.log('sortscore', aScore, bScore, a, b)
-            return bScore - aScore
-          }))
-
           payload.rootNodes = violators
-          pending = false;
-          console.log('done.', new Date().getTime())
         }
       })
 
