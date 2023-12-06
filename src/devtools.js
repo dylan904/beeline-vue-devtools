@@ -26,7 +26,7 @@ function tallyOccurance(existingInstanceViolation, violation) {
     console.log('tallycheck1', existingUniqueViolation.occurences, tag, existingUniqueViolation)
     if (existingUniqueViolation.occurences === 2) {
       existingUniqueViolation.tags.push({
-        isOccurances: true,
+        isOccurences: true,
         label: 'x2',
         textColor: 0xFFFFFF,
         backgroundColor: 0x0000FF,
