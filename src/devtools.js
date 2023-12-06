@@ -19,11 +19,12 @@ export function prepareAccessibilityAudit() {
 
 function tallyOccurance(existingInstanceViolation, violation) {
   const existingUniqueViolation = existingInstanceViolation.children.find(child => child.label === violation.id)
+  
   if (existingUniqueViolation) {
-    ++existingInstanceViolation.occurences
+    ++existingUniqueViolation.occurences
     const tag = existingUniqueViolation.tags.find(tag => tag.isOccurences)
-    console.log('tallycheck1', existingInstanceViolation.occurences, tag)
-    if (existingInstanceViolation.occurences === 2) {
+    console.log('tallycheck1', existingUniqueViolation.occurences, tag, existingUniqueViolation)
+    if (existingUniqueViolation.occurences === 2) {
       existingUniqueViolation.tags.push({
         isOccurances: true,
         label: 'x2',
