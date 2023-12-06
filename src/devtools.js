@@ -156,6 +156,7 @@ export const DevtoolsPlugin = {
       window.componentInstances = componentInstances
       console.log('instances', componentInstances);
       let violators = []
+      let pending = true
       const relevantComponentInstances = componentInstances.filter(instance => instance.type.__file && instance.subTree.el.nodeType === 1)
 
       console.log('wintest', window);
@@ -270,12 +271,13 @@ export const DevtoolsPlugin = {
           }))
 
           payload.rootNodes = violators
+          pending = false;
         }
       })
 
       api.on.getInspectorState(payload => {
         if (payload.inspectorId === 'test-inspector') {
-          console.log('nodeid', payload.nodeId, violators)
+          console.log('nodeid', {pending}, payload.nodeId, violators)
           if (typeof payload.nodeId === 'string') {
             let nodeId
             if (payload.nodeId.includes('instance')) {
