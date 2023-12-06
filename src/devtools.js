@@ -131,7 +131,7 @@ async function getViolators() {
   }))
 
   pending = false;
-  console.log('done.', new Date().getTime())
+  console.log('done.', violators, new Date().getTime())
   return violators;
 }
 
