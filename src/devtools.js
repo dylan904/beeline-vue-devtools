@@ -17,9 +17,7 @@ export function prepareAccessibilityAudit() {
     })
 }
 
-function tallyOccurance(existingInstanceViolation, violation) {
-  const existingUniqueViolation = existingInstanceViolation.children.find(child => child.label === violation.id)
-  
+function tallyOccurence(existingInstanceViolation, existingUniqueViolation) {
   if (existingUniqueViolation) {
     ++existingUniqueViolation.occurences
     const tag = existingUniqueViolation.tags.find(tag => tag.isOccurences)
@@ -266,10 +264,12 @@ export const DevtoolsPlugin = {
 
                 const existingInstanceViolation = violator.children.find(v => Number(v.id.split('-')[2]) === uid)
                 if (existingInstanceViolation) {
-                  tallyOccurance(existingInstanceViolation, violation);
-                  existingInstanceViolation.children.push(uniqueViolation)
+                  const existingUniqueViolation = existingInstanceViolation.children.find(child => child.label === violation.id)
+                  tallyOccurence(existingInstanceViolation, existingUniqueViolation);
+                  if (!existingUniqueViolation)
+                    existingInstanceViolation.children.push(uniqueViolation)
                 } else {
-                  //tallyOccurance(existingInstanceViolation, violation);
+                  //tallyOccurence(existingInstanceViolation, violation);
                   violator.children.push(instanceViolation)
                 }
                 instanceViolation.label = 'Instance #' + violator.children.length
