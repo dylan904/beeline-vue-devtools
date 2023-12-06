@@ -17,6 +17,25 @@ export function prepareAccessibilityAudit() {
     })
 }
 
+function tallyOccurance(existingInstanceViolation, violation) {
+  const existingUniqueViolation = existingInstanceViolation.children.find(child => child.label === violation.id)
+  if (existingUniqueViolation) {
+    ++existingInstanceViolation.occurences
+    if (existingInstanceViolation.occurences === 2) {
+      existingUniqueViolation.tags.push({
+        isOccurances: true,
+        label: 'x2',
+        textColor: 0xFFFFFF,
+        backgroundColor: 0x0000FF,
+      })
+    }
+    else {
+      const tag = existingUniqueViolation.tags.find(tag => tag.isOccurences)
+      tag.label = 'x' + existingInstanceViolation.occurences
+    }
+  }
+}
+
 function inspectDOM (id) {
   if (!id) return
   if (isChrome) {
@@ -202,6 +221,7 @@ export const DevtoolsPlugin = {
                 id: uid + '-' + random + '-' + violation.id,
                 uid: uid,
                 label: violation.id,
+                occurences: 1,
                 tags: [
                   {
                     label: violation.impact,
@@ -243,8 +263,10 @@ export const DevtoolsPlugin = {
 
                 const existingInstanceViolation = violator.children.find(v => Number(v.id.split('-')[2]) === uid)
                 if (existingInstanceViolation) {
+                  tallyOccurance(existingInstanceViolation, violation);
                   existingInstanceViolation.children.push(uniqueViolation)
                 } else {
+                  //tallyOccurance(existingInstanceViolation, violation);
                   violator.children.push(instanceViolation)
                 }
                 instanceViolation.label = 'Instance #' + violator.children.length
