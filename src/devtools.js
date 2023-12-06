@@ -5,8 +5,17 @@ import { ref, watch } from 'vue'
 import { isChrome } from './utils/env'
 import { BridgeEvents } from './utils/consts'
 import { getBridge, useBridge } from './features/bridge'
+import { auditAccessibility } from './utils/auditAccessibility'
+import devtools from '@vue/devtools'
 
-export { auditAccessibility } from './utils/auditAccessibility'
+const compEls = ref({ value: [] })
+
+export function prepareAccessibilityAudit() {
+  devtools.connect()
+    watch(compEls, (els) => {
+        auditAccessibility(els)
+    })
+}
 
 function inspectDOM (id) {
   if (!id) return
@@ -94,8 +103,6 @@ async function openInEditor (file) {
     throw err
   }
 }
-
-export const compEls = ref({ value: [] })
 
 function getClosestComponentInstance (vEl) {
   if (vEl.__vueParentComponent) {
