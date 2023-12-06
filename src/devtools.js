@@ -249,8 +249,9 @@ export const DevtoolsPlugin = {
 
       const componentInstances = await api.getComponentInstances(app)
       window.componentInstances = componentInstances
-      console.log('instances', componentInstances);
+      
       let violators = getViolators()
+      console.log('instances', componentInstances, violators);
       let pending = true
       const relevantComponentInstances = componentInstances.filter(instance => instance.type.__file && instance.subTree.el.nodeType === 1)
 
