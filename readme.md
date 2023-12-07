@@ -30,5 +30,5 @@ From your package.json, add one script:
 
 ## Usage
 
-		npm run test:audit
+	npm run test:audit
 
