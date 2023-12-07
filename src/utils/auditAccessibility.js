@@ -28,12 +28,12 @@ function closestAncestor(el, candidateParents) {
 }
 
 export function auditAccessibility(compEls) {
-  
-  // ...run audit tracker code
+
+  // ...run audit tracker code...
 
   if (!process.env.AUDITA11Y)
     return
-  
+
   const script = document.createElement("script");
   script.src = 'https://cdnjs.cloudflare.com/ajax/libs/axe-core/4.8.2/axe.min.js';
   script.type = 'text/javascript';
@@ -52,6 +52,8 @@ export function auditAccessibility(compEls) {
             console.log('failtofind', vEl, violation)
           //else if (closestComponent !== otherClosestComponent)
           //    console.error('not matching closest component', vEl.__vueParentComponent, closestComponent)
+          else
+            console.log('closest', vEl, closestComponent, violation)
         }
       }
 
