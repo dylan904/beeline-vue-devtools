@@ -10,6 +10,19 @@ import devtools from '@vue/devtools'
 
 const compEls = ref({ value: [] })
 
+const impactTextMap = {
+    critical: 0xFFFFFF,
+    serious: 0xFFFFFF,
+    moderate: 0x000000,
+    minor: 0x000000,
+}
+const impactBGMap = {
+    critical: 0xfc1c03,
+    serious: 0xff6a0d,
+    moderate: 0xfcf403,
+    minor: 0xc9c8c7,
+  }
+
 export function prepareAccessibilityAudit() {
   devtools.connect()
     watch(compEls, (els) => {
@@ -17,23 +30,14 @@ export function prepareAccessibilityAudit() {
     })
 }
 
-function tallyOccurence(existingInstanceViolation, existingUniqueViolation) {
-  if (existingUniqueViolation) {
-    ++existingUniqueViolation.occurences
-    const tag = existingUniqueViolation.tags.find(tag => tag.isOccurences)
-    console.log('tallycheck1', existingUniqueViolation.occurences, tag, existingUniqueViolation)
-    if (existingUniqueViolation.occurences === 2) {
-      existingUniqueViolation.tags.push({
-        isOccurences: true,
-        label: 'x2',
-        textColor: 0xFFFFFF,
-        backgroundColor: 0x0000FF,
-      })
-    }
-    else {
-      
-      tag.label = 'x' + existingUniqueViolation.occurences
-    }
+function tallyInstanceOccurence(v, isAgg) {
+  if (v) {
+    ++v.occurences
+    const tag = v.tags.find(tag => tag.impact)
+    tag.label = tag.impact + ' (x' + v.occurences + ')'
+  }
+  else {
+    console.error('cant tally!')
   }
 }
 
@@ -55,22 +59,15 @@ function getViolatingComponents (id, violators, componentInstances) {
   }
 }
 
-const violationSortScoreScale = {
-  minor: 1,
-  moderate: 100,
-  serious: 10000,
-  critical: 1000000,
-}
-
 function getViolationSortScore (accumulator, item) {
-  console.log('scoreme1?', item)
-  return accumulator + item.children.reduce(getViolationSortScoreDeep, 0)
-}
+    const modifier = 5 // each step of impact has x times this weight
+    const violationSortScoreScale = { minor: 1 }
+    violationSortScoreScale.moderate = violationSortScoreScale.minor * modifier
+    violationSortScoreScale.serious = violationSortScoreScale.moderate * modifier
+    violationSortScoreScale.critical = violationSortScoreScale.serious * modifier
 
-function getViolationSortScoreDeep (accumulator, item) {
-  console.log('scoreme2?', item)
-  const impact = item.tags[0].label
-  return accumulator + violationSortScoreScale[impact]
+    const impact = item.tags[0].label
+    return accumulator + violationSortScoreScale[impact]
 }
 
 function getViolation (id, violators) {
@@ -155,46 +152,61 @@ function closestAncestor (el, candidateComponents) {
   return null
 }
 
+function labelOtherImpacts(impactArray, isAgg) {
+    for (const item of impactArray) {
+        
+        const impactCounts = {
+            critical: 0,
+            serious: 0,
+            moderate: 0,
+            minor: 0
+        }
+
+        console.log('test', item.children)
+        const violations = isAgg ? item.children.find(child => child.label === 'Aggregate').children : item.children
+        for (const violation of violations) {
+            const impact = violation.tags.find(tag => tag.impact).impact
+            impactCounts[impact] += violation.occurences
+        }
+        
+
+        console.log({impactCounts})
+        
+        for (const [label, count] of Object.entries(impactCounts)) {
+            if (count) {
+                console.log('pushit to tags', item)
+                item.tags.push({
+                    label: label + ' (x' + count + ')',
+                    textColor: impactTextMap[label],
+                    backgroundColor: impactBGMap[label],
+                })
+            }
+        }
+        console.log('testmenow', impactCounts, item)
+    }
+}
+
 export const DevtoolsPlugin = {
   install: (app) => {
     app.provide('componentEls', compEls)
     setupDevtoolsPlugin({
-      id: 'simple-plugin',
-      label: 'Simple devtools plugin',
+      id: 'beeline-a11y-plugin',
+      label: 'Beeline A11y',
       app,
     }, async (api) => {
-      console.log('settings', api.getSettings())
-
       const componentInstances = await api.getComponentInstances(app)
-      window.componentInstances = componentInstances
-      console.log('instances', componentInstances);
       let violators = []
       const pending = ref({ value: true })
+      let inited = false;
       const relevantComponentInstances = componentInstances.filter(instance => instance.type.__file && instance.subTree.el.nodeType === 1)
-
-      console.log('wintest', window);
-
       compEls.value = relevantComponentInstances.map(instance => instance.subTree.el)
 
-      console.log('set componentEls', compEls)
-
       api.on.getInspectorTree(async payload => {
-        if (payload.inspectorId === 'test-inspector') {
+        if (payload.inspectorId === 'test-inspector' && !inited) {
+          inited = true;
           const doc = window.document
           violators = []
-          const impactBGMap = {
-            critical: 0xfc1c03,
-            serious: 0xff6a0d,
-            moderate: 0xfcf403,
-            minor: 0xc9c8c7,
-          }
-          const impactTextMap = {
-            critical: 0xFFFFFF,
-            serious: 0xFFFFFF,
-            moderate: 0x000000,
-            minor: 0x000000,
-          }
-
+          
           if (!relevantComponentInstances) {
             console.error('No component Els...')
             return
@@ -204,14 +216,15 @@ export const DevtoolsPlugin = {
             return
           }
 
-          window.console.log('testme', window.violations)
+          window.console.log('testme', window.violations, componentInstances)
 
-          for (const violation of window.violations) {
-            for (const node of violation.nodes) {
+          for (const [vi, violation] of window.violations.entries()) {
+            for (const [ni, node] of violation.nodes.entries()) {
               const vEl = doc.querySelector(node.target[0])
               if (!vEl) {
                 console.log('wtf', node, violation)
               }
+              console.log('initcheck', vi, ni, node, vEl)
               // const closestComponentInstance = closestAncestor(vEl, relevantComponentInstances) || { uid: -1, type: { name: 'ROOT' } }
               const closestComponentInstance = getClosestComponentInstance(vEl)
               const componentName = await api.getComponentName(closestComponentInstance)
@@ -225,6 +238,7 @@ export const DevtoolsPlugin = {
                 occurences: 1,
                 tags: [
                   {
+                    impact: violation.impact,
                     label: violation.impact,
                     textColor: impactTextMap[violation.impact],
                     backgroundColor: impactBGMap[violation.impact],
@@ -238,8 +252,9 @@ export const DevtoolsPlugin = {
               const instanceId = 'instance-' + random + '-' + uid
               const instanceViolation = {
                 id: instanceId,
+                tags: [],
                 children: [
-                  uniqueViolation,
+                  uniqueViolation
                 ],
               }
 
@@ -255,34 +270,105 @@ export const DevtoolsPlugin = {
                   label: '<' + componentName + '>',
                   color: 0xFF0000,
                   textColor: 0x00FF00,
+                  tags: [],
                   children: [
-                    instanceViolation,
-                  ],
+                    {
+                        uid: uid + '-agg',
+                        label: 'Aggregate',
+                        children: [ JSON.parse(JSON.stringify(uniqueViolation)) ]
+                    },
+                    {
+                        uid: uid + '-instances',
+                        label: 'Instances',
+                        children: [ instanceViolation ]
+                    }
+                  ]
                 })
               } else {
-                console.log('pushit', uniqueViolation, instanceViolation)
+                console.log('pushitrealguud', uniqueViolation, instanceViolation)
 
-                const existingInstanceViolation = violator.children.find(v => Number(v.id.split('-')[2]) === uid)
+                const instanceViolations = violator.children.find(v => v.label === 'Instances').children
+                const aggViolations = violator.children.find(v => v.label === 'Aggregate').children
+
+                console.log('testv', instanceViolation, aggViolations, violator.children)
+
+                const existingInstanceViolation = instanceViolations.find(v => Number(v.id.split('-')[2]) === uid)
+                
                 if (existingInstanceViolation) {
-                  const existingUniqueViolation = existingInstanceViolation.children.find(child => child.label === violation.id)
-                  tallyOccurence(existingInstanceViolation, existingUniqueViolation);
-                  if (!existingUniqueViolation)
-                    existingInstanceViolation.children.push(uniqueViolation)
+                    
+                    const existingUniqueViolation = existingInstanceViolation.children.find(child => child.label === violation.id)
+                    if (violator.children.length === 1) {
+                        console.log('checkitout', componentName, violation.id, vEl, node.target[0], existingInstanceViolation, existingUniqueViolation)
+                    }
+
+                    console.log('icheck: tally before', existingUniqueViolation ? existingUniqueViolation.occurences : componentName, existingInstanceViolation.children[0])
+
+                    // look into below. tally only works if existing, check after only works if not
+
+                    tallyInstanceOccurence(existingUniqueViolation)
+                    console.log('icheck: tally after', existingUniqueViolation ? existingUniqueViolation.occurences : componentName, existingInstanceViolation.children[0])
+
+                    console.log('check existing', existingInstanceViolation.children.map(c => c.occurences))
                 } else {
-                  //tallyOccurence(existingInstanceViolation, violation);
-                  violator.children.push(instanceViolation)
+                    // tallyOccurence(existingUniqueViolation);
+                    console.log('tryme', instanceViolation.children[0].occurences, instanceViolation)
+                    instanceViolations.push(instanceViolation)
                 }
+
+                console.log('vcheck', violators.map(v => v.children[1].children.map(c => c.children[0].occurences)))
+
+
+
+
+
+                const existingAggViolation = aggViolations.find(v => v.label === violation.id)
+                console.log('search for agg', componentName, violation.id, existingAggViolation, uid, aggViolations)
+                if (existingAggViolation) {
+                    //++existingAggViolation.occurences
+                    console.log('aggcheck: tally before', componentName, existingAggViolation.occurences, JSON.parse(JSON.stringify(violators.find(v => v.name === componentName))))
+                    tallyInstanceOccurence(existingAggViolation, true)
+                    console.log('aggcheck: tally after', componentName, existingAggViolation.occurences, JSON.parse(JSON.stringify(violators.find(v => v.name === componentName))))
+                }
+                else {
+                    console.log('testthis before', uniqueViolation)
+                    const uniqueViolationCopy = JSON.parse(JSON.stringify(uniqueViolation))
+                    uniqueViolationCopy.id = uid + '-' + random + '-' + violation.id + '-agg'    // needs unique id
+                    uniqueViolationCopy.occurences = 1
+
+                    
+
+                    console.log('aggcheck: create new', uniqueViolationCopy)
+                    console.log('testthis after', uniqueViolation, uniqueViolationCopy)
+                    
+                    aggViolations.push(uniqueViolationCopy)
+                }
+
+
+
+
+
+
+
                 instanceViolation.label = 'Instance #' + violator.children.length
               }
             }
           }
 
+          labelOtherImpacts(violators, true)
+          for (const violator of violators) {
+            labelOtherImpacts(violator.children.find(v => v.label === 'Instances').children, false)
+          }
+
+          
+
           console.log('checkviolators', violators)
 
           console.log('sorteddd', violators.sort((a, b) => {
-            const aScore = a.children.reduce(getViolationSortScore, 0)
+            const aAggViolations = a.children.find(v => v.label === 'Aggregate').children
+            const aScore = aAggViolations.reduce(getViolationSortScore, 0)
             a.score = aScore
-            const bScore = b.children.reduce(getViolationSortScore, 0)
+            const bAggViolations = b.children.find(v => v.label === 'Aggregate').children
+            const bScore = bAggViolations.reduce(getViolationSortScore, 0)
             b.score = bScore
             console.log('sortscore', aScore, bScore, a, b)
             return bScore - aScore
@@ -290,7 +376,7 @@ export const DevtoolsPlugin = {
 
           payload.rootNodes = violators
           pending.value = false;
-          console.log('done.', new Date().getTime())
+          console.log('done.', new Date().getTime(), violators)
         }
       })
 
