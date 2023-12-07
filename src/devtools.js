@@ -51,7 +51,6 @@ function inspectDOM(id) {
 }
 
 function getViolatingComponents(id, violators, componentInstances) {
-    const components = []
     for (const violator of violators) {
         if (violator.id === id) {
             return violator.children.map(child => componentInstances.find(instance => instance.uid === child.uid))
@@ -106,8 +105,6 @@ async function openInEditor(file) {
         console.log(err)
     }
 
-    console.log('three...')
-
     try {
         console.log('openineditor attempt')
         // eslint-disable-next-line no-eval
@@ -131,30 +128,15 @@ function getClosestComponentInstance(vEl) {
                 return vEl.__vueParentComponent
             }
         } else {
-            console.log('revert')
             return vEl.__vueParentComponent
         }
     } else {
-        console.log('default')
         return { uid: -1, type: { name: 'ROOT' } }
     }
 }
 
-function closestAncestor(el, candidateComponents) {
-    while (el) {
-        for (const candidate of candidateComponents) {
-            if (candidate.subTree.el === el) {
-                return candidate
-            }
-        }
-        el = el.parentElement
-    }
-    return null
-}
-
 function labelOtherImpacts(impactArray, isAgg) {
     for (const item of impactArray) {
-
         const impactCounts = {
             critical: 0,
             serious: 0,
@@ -162,19 +144,14 @@ function labelOtherImpacts(impactArray, isAgg) {
             minor: 0
         }
 
-        console.log('test', item.children)
         const violations = isAgg ? item.children.find(child => child.label === 'Aggregate').children : item.children
         for (const violation of violations) {
             const impact = violation.tags.find(tag => tag.impact).impact
             impactCounts[impact] += violation.occurences
         }
 
-
-        console.log({ impactCounts })
-
         for (const [label, count] of Object.entries(impactCounts)) {
             if (count) {
-                console.log('pushit to tags', item)
                 item.tags.push({
                     label: label + ' (x' + count + ')',
                     textColor: impactTextMap[label],
@@ -182,7 +159,6 @@ function labelOtherImpacts(impactArray, isAgg) {
                 })
             }
         }
-        console.log('testmenow', impactCounts, item)
     }
 }
 
@@ -216,15 +192,12 @@ export const DevtoolsPlugin = {
                         return
                     }
 
-                    window.console.log('testme', window.violations, componentInstances)
-
                     for (const [vi, violation] of window.violations.entries()) {
                         for (const [ni, node] of violation.nodes.entries()) {
                             const vEl = doc.querySelector(node.target[0])
                             if (!vEl) {
                                 console.log('wtf', node, violation)
                             }
-                            console.log('initcheck', vi, ni, node, vEl)
                             // const closestComponentInstance = closestAncestor(vEl, relevantComponentInstances) || { uid: -1, type: { name: 'ROOT' } }
                             const closestComponentInstance = getClosestComponentInstance(vEl)
                             const componentName = await api.getComponentName(closestComponentInstance)
@@ -245,8 +218,6 @@ export const DevtoolsPlugin = {
                                     },
                                 ],
                             }
-
-                            console.log('testthis', componentName, closestComponentInstance, node.html, vEl, violation)
 
                             const violator = violators.find(violator => violator.name === componentName)
                             const instanceId = 'instance-' + random + '-' + uid
@@ -285,69 +256,27 @@ export const DevtoolsPlugin = {
                                     ]
                                 })
                             } else {
-                                console.log('pushitrealguud', uniqueViolation, instanceViolation)
-
                                 const instanceViolations = violator.children.find(v => v.label === 'Instances').children
                                 const aggViolations = violator.children.find(v => v.label === 'Aggregate').children
-
-                                console.log('testv', instanceViolation, aggViolations, violator.children)
-
                                 const existingInstanceViolation = instanceViolations.find(v => Number(v.id.split('-')[2]) === uid)
 
                                 if (existingInstanceViolation) {
-
                                     const existingUniqueViolation = existingInstanceViolation.children.find(child => child.label === violation.id)
-                                    if (violator.children.length === 1) {
-                                        console.log('checkitout', componentName, violation.id, vEl, node.target[0], existingInstanceViolation, existingUniqueViolation)
-                                    }
-
-                                    console.log('icheck: tally before', existingUniqueViolation ? existingUniqueViolation.occurences : componentName, existingInstanceViolation.children[0])
-
-                                    // look into below. tally only works if existing, check after only works if not
-
                                     tallyInstanceOccurence(existingUniqueViolation)
-                                    console.log('icheck: tally after', existingUniqueViolation ? existingUniqueViolation.occurences : componentName, existingInstanceViolation.children[0])
-
-                                    console.log('check existing', existingInstanceViolation.children.map(c => c.occurences))
                                 } else {
-                                    // tallyOccurence(existingUniqueViolation);
-                                    console.log('tryme', instanceViolation.children[0].occurences, instanceViolation)
                                     instanceViolations.push(instanceViolation)
                                 }
 
-                                console.log('vcheck', violators.map(v => v.children[1].children.map(c => c.children[0].occurences)))
-
-
-
-
-
                                 const existingAggViolation = aggViolations.find(v => v.label === violation.id)
-                                console.log('search for agg', componentName, violation.id, existingAggViolation, uid, aggViolations)
                                 if (existingAggViolation) {
-                                    //++existingAggViolation.occurences
-                                    console.log('aggcheck: tally before', componentName, existingAggViolation.occurences, JSON.parse(JSON.stringify(violators.find(v => v.name === componentName))))
                                     tallyInstanceOccurence(existingAggViolation, true)
-                                    console.log('aggcheck: tally after', componentName, existingAggViolation.occurences, JSON.parse(JSON.stringify(violators.find(v => v.name === componentName))))
                                 }
                                 else {
-                                    console.log('testthis before', uniqueViolation)
                                     const uniqueViolationCopy = JSON.parse(JSON.stringify(uniqueViolation))
                                     uniqueViolationCopy.id = uid + '-' + random + '-' + violation.id + '-agg'    // needs unique id
                                     uniqueViolationCopy.occurences = 1
-
-
-
-                                    console.log('aggcheck: create new', uniqueViolationCopy)
-                                    console.log('testthis after', uniqueViolation, uniqueViolationCopy)
-
                                     aggViolations.push(uniqueViolationCopy)
                                 }
-
-
-
-
-
-
 
                                 instanceViolation.label = 'Instance #' + violator.children.length
                             }
@@ -358,10 +287,6 @@ export const DevtoolsPlugin = {
                     for (const violator of violators) {
                         labelOtherImpacts(violator.children.find(v => v.label === 'Instances').children, false)
                     }
-
-
-
-                    console.log('checkviolators', violators)
 
                     console.log('sorteddd', violators.sort((a, b) => {
                         const aAggViolations = a.children.find(v => v.label === 'Aggregate').children
@@ -376,21 +301,15 @@ export const DevtoolsPlugin = {
 
                     payload.rootNodes = violators
                     pending.value = false;
-                    console.log('done.', new Date().getTime(), violators)
                 }
             })
 
             api.on.getInspectorState(payload => {
                 if (payload.inspectorId === 'test-inspector') {
-
-                    console.log('nodeid', { pending: pending.value }, new Date().getTime(), payload.nodeId, violators)
-
-
                     if (typeof payload.nodeId === 'string') {
                         let nodeId
                         if (payload.nodeId.includes('instance')) {
                             nodeId = payload.nodeId.split('-')[2]
-                            console.log('test')
                         } else {
                             nodeId = payload.nodeId.split('-')[0]
                             const violation = getViolation(payload.nodeId, violators)
@@ -408,14 +327,12 @@ export const DevtoolsPlugin = {
 
                         const instance = componentInstances.find(instance => instance.uid.toString() === nodeId)
                         if (instance) {
-                            console.log('highlight', instance)
                             api.highlightElement(instance)
                         } else {
                             console.log('cant highlight', nodeId)
                         }
                     } else {
                         const violatingInstances = getViolatingComponents(payload.nodeId, violators, componentInstances)
-                        console.log(payload, violatingInstances)
 
                         if (violatingInstances.length) {
                             for (const violatingInstance of violatingInstances) {
@@ -471,10 +388,7 @@ export const DevtoolsPlugin = {
                         tooltip: 'Scroll to component',
                         action: (id) => {
                             const uid = typeof id === 'number' ? id : Number(id.split('-')[0])
-                            console.log('Node action scroll', id, uid)
-
                             const { bridge } = useBridge()
-                            console.log('bridgeis', bridge)
                             bridge.send(BridgeEvents.TO_BACK_COMPONENT_SCROLL_TO, {
                                 instanceId: uid,
                             })
@@ -485,7 +399,6 @@ export const DevtoolsPlugin = {
                         tooltip: 'Inspect DOM',
                         action: (id) => {
                             const uid = typeof id === 'number' ? id : Number(id.split('-')[0])
-                            console.log('Node action inspect', id, uid)
                             inspectDOM(uid)
                         },
                     },
@@ -497,7 +410,6 @@ export const DevtoolsPlugin = {
                                 const uid = typeof id === 'number' ? id : Number(id.split('-')[0])
                                 const componentInstance = componentInstances.find(instance => instance.uid === uid)
                                 const componentFile = componentInstance ? componentInstance.type.__file || componentInstance.parent?.type.__file : null
-                                console.log('open instance', uid, componentFile, componentInstance, relevantComponentInstances, componentInstances)
 
                                 if (componentFile) {
                                     openInEditor(componentFile)
