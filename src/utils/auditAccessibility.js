@@ -46,8 +46,6 @@ export function auditAccessibility(compEls) {
             console.log('failtofind', vEl, violation)
           //else if (closestComponent !== otherClosestComponent)
           //    console.error('not matching closest component', vEl.__vueParentComponent, closestComponent)
-          else
-            console.log('closest', vEl, closestComponent, violation)
         }
       }
 
