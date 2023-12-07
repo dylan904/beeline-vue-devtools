@@ -8,19 +8,25 @@ This plugin in its current state is designed to help debug **accessibility** iss
 
 We are going to import the plugin and preparation function:
 
-	import { DevtoolsPlugin, prepareAccessibilityAudit } from 'beeline-vue-devtools/src/devtools'
+```js
+import { DevtoolsPlugin, prepareAccessibilityAudit } from 'beeline-vue-devtools/src/devtools'
+```
 
 Then, after the app is created we have it use our plugin:
 
-	// const app = createApp(App)
-	...
-	app.use(DevtoolsPlugin)
+```js
+// const app = createApp(App)
+...
+app.use(DevtoolsPlugin)
+```
 
 Last, at the bottom of the page, add this code block:
 
-	if (process.env.NODE_ENV === 'development' && process.env.AUDITA11Y) {
-		prepareAccessibilityAudit()
-	}
+```js
+if (process.env.NODE_ENV === 'development' && process.env.AUDITA11Y) {
+	prepareAccessibilityAudit()
+}
+```
 
 ## package.json
 
@@ -31,5 +37,3 @@ From your package.json, add one script:
 # Usage
 
 	npm run test:audit
-
-``` test(); ```js
