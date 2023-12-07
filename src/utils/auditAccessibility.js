@@ -1,69 +1,64 @@
 function getClosestComponent(vEl) {
-    if (vEl.__vueParentComponent) {
-      if (vEl.__vnode.dirs?.length) {
-        try {
-          return vEl.__vnode.dirs[0].instance.$el.__vueParentComponent || vEl.__vueParentComponent
-        } catch (err) {
-          console.log('cant apply instance to dir', err)
-          return vEl.__vueParentComponent
-        }
-      } else {
-        console.log('revert')
+  if (vEl.__vueParentComponent) {
+    if (vEl.__vnode.dirs?.length) {
+      try {
+        return vEl.__vnode.dirs[0].instance.$el.__vueParentComponent || vEl.__vueParentComponent
+      } catch (err) {
+        console.log('cant apply instance to dir', err)
         return vEl.__vueParentComponent
       }
     } else {
-      console.log('default')
-      return { uid: -1, type: { name: 'ROOT' } }
+      console.log('revert')
+      return vEl.__vueParentComponent
     }
+  } else {
+    console.log('default')
+    return { uid: -1, type: { name: 'ROOT' } }
+  }
 }
-  
+
 function closestAncestor(el, candidateParents) {
-    while (el) {
-      for (const candidate of candidateParents) {
-        if (candidate === el) {
-          return el
-        }
+  while (el) {
+    for (const candidate of candidateParents) {
+      if (candidate === el) {
+        return el
       }
-      el = el.parentElement
     }
-    return null
+    el = el.parentElement
+  }
+  return null
 }
 
 export function auditAccessibility(compEls) {
-    console.log('test', compEls)
-    const script = document.createElement("script");
-    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/axe-core/4.8.2/axe.min.js';
-    script.type = 'text/javascript';
-    document.body.appendChild(script);
+  const script = document.createElement("script");
+  script.src = 'https://cdnjs.cloudflare.com/ajax/libs/axe-core/4.8.2/axe.min.js';
+  script.type = 'text/javascript';
+  document.body.appendChild(script);
 
-    return new Promise((resolve, reject) => {
-        console.log('waitforscript', script)
-        script.onload = async () => {
-        console.log('try4?')
-        const result = await axe.run()
+  return new Promise((resolve, reject) => {
+    console.log('waitforscript', script)
+    script.onload = async () => {
+      console.log('try4?')
+      const result = await axe.run()
 
-    for (const violation of result.violations) {
+      for (const violation of result.violations) {
         for (const node of violation.nodes) {
-            const vEl = document.body.querySelector(node.target[0])
-            //console.log('try closest', node.target, vEl, compEls)
-            const closestComponent = closestAncestor(vEl, compEls)
-            const otherClosestComponent = getClosestComponent(vEl);
-            console.log({ closestComponent, otherClosestComponent })
-            if (!closestComponent)
-                console.log('failtofind', vEl, violation)
-            //else if (closestComponent !== otherClosestComponent)
-            //    console.error('not matching closest component', vEl.__vueParentComponent, closestComponent)
-            else
-                console.log('closest', vEl, closestComponent, violation)
-            }
+          const vEl = document.body.querySelector(node.target[0])
+          const closestComponent = closestAncestor(vEl, compEls)
+          const otherClosestComponent = getClosestComponent(vEl);
+          console.log({ closestComponent, otherClosestComponent })
+          if (!closestComponent)
+            console.log('failtofind', vEl, violation)
+          //else if (closestComponent !== otherClosestComponent)
+          //    console.error('not matching closest component', vEl.__vueParentComponent, closestComponent)
+          else
+            console.log('closest', vEl, closestComponent, violation)
         }
+      }
 
-        window.violations = result.violations
-        console.log(result.violations)
-        //console.log('violations', result.violations[0].nodes[6].target[0])
-        
-        resolve({ result, compEls })
-        }
-        
-    })
+      window.violations = result.violations
+      console.log(result.violations)
+      resolve({ result, compEls })
+    }
+  })
 }
