@@ -8,11 +8,9 @@ function getClosestComponent(vEl) {
         return vEl.__vueParentComponent
       }
     } else {
-      console.log('revert')
       return vEl.__vueParentComponent
     }
   } else {
-    console.log('default')
     return { uid: -1, type: { name: 'ROOT' } }
   }
 }
@@ -36,16 +34,13 @@ export function auditAccessibility(compEls) {
   document.body.appendChild(script);
 
   return new Promise((resolve, reject) => {
-    console.log('waitforscript', script)
     script.onload = async () => {
-      console.log('try4?')
       const result = await axe.run()
-
       for (const violation of result.violations) {
         for (const node of violation.nodes) {
           const vEl = document.body.querySelector(node.target[0])
           const closestComponent = closestAncestor(vEl, compEls)
-          const otherClosestComponent = getClosestComponent(vEl);
+          //const otherClosestComponent = getClosestComponent(vEl);
           console.log({ closestComponent, otherClosestComponent })
           if (!closestComponent)
             console.log('failtofind', vEl, violation)
