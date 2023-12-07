@@ -12,15 +12,15 @@ We are going to import the plugin and preparation function:
 
 Then, after the app is created we have it use our plugin:
 
-		// const app = createApp(App)
-		...
-		app.use(DevtoolsPlugin)
+	// const app = createApp(App)
+	...
+	app.use(DevtoolsPlugin)
 
 Last, at the bottom of the page, add this code block:
 
-		if (process.env.NODE_ENV === 'development' && process.env.AUDITA11Y) {
-			prepareAccessibilityAudit()
-		}
+	if (process.env.NODE_ENV === 'development' && process.env.AUDITA11Y) {
+		prepareAccessibilityAudit()
+	}
 
 ## package.json
 
