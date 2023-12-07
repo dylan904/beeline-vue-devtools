@@ -32,7 +32,7 @@ if (process.env.NODE_ENV === 'development' && process.env.AUDITA11Y) {
 
 From your package.json, add one script:
 
-	"test:audit": "AUDITA11Y=1 ./node_modules/.bin/vue-devtools & vite"
+	"test:audit": "AUDITA11Y=1 ./node_modules/.bin/vue-devtools & npm run dev"
 
 # Usage
 
