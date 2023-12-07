@@ -4,7 +4,7 @@ This plugin in its current state is designed to help debug **accessibility** iss
 
 # Installation
 
-### Plugin Setup (main.js)
+## Plugin Setup (main.js)
 
 We are going to import the plugin and preparation function:
 
@@ -22,13 +22,13 @@ Last, at the bottom of the page, add this code block:
 			prepareAccessibilityAudit()
 		}
 
-### package.json
+## package.json
 
 From your package.json, add one script:
 
 	"test:audit": "AUDITA11Y=1 ./node_modules/.bin/vue-devtools & vite"
 
-## Usage
+# Usage
 
 	npm run test:audit
 
