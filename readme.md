@@ -32,3 +32,4 @@ From your package.json, add one script:
 
 	npm run test:audit
 
+``` test(); ```js
