@@ -47,3 +47,21 @@ async function getModifiedInfo(filePath, exec) {
   }
   return null
 }
+
+export function revisionWatcher() {
+  return {
+    name: 'grammarwatch',
+    enforce: 'post',
+    // HMR
+    async handleHotUpdate({ file, server }) {
+      console.log('reloading revisions...', file.endsWith('.vue'), file);
+      if (file.endsWith('.vue')) {
+        server.ws.send({
+          type: 'custom',
+          event: 'revisions-update',
+          data: await getRevisions()
+        })
+      }
+    },
+  }
+}
