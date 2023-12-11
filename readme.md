@@ -38,7 +38,10 @@ From your package.json, add one script:
 
 We'll want to pass along a few environment variables for useful context in the auditing process.
 
-If using vite, first import these lines:
+If using vite, rename your vite.config:
+	`vite.config.js` -> `vite.config.mjs`
+
+Inside your vite config file, import these lines:
 
 ```js
 import { version } from './package.json'
