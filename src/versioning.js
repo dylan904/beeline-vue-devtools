@@ -1,5 +1,8 @@
 import path from 'path'
 import fs from 'fs'
+import packageJSON from '../package.json'
+import { promisify } from 'util'
+import { exec } from 'child_process' 
 
 function fromDir(startPath, filter, callback) {
     if (!fs.existsSync(startPath)) {
@@ -23,12 +26,11 @@ fromDir('./src', /\.vue$/, function(info) {
 });
 
 export async function getRevisions() {
-  const util = require('util');
-  const exec = util.promisify(require('child_process').exec);
+  const execPromise = promisify(exec)
 
   const revisions = {}
   for (const componentFile of componentFiles) {
-    revisions[componentFile] = await getModifiedInfo(componentFile, exec)
+    revisions[componentFile] = await getModifiedInfo(componentFile, execPromise)
   }
   return revisions
 }
@@ -47,4 +49,4 @@ async function getModifiedInfo(filePath, exec) {
   return null
 }
 
-export const version = require('../package.json').version
+export const version = packageJSON.version
