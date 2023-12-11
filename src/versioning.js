@@ -48,7 +48,7 @@ async function getModifiedInfo(filePath, exec) {
   return null
 }
 
-export function revisionWatcher() {
+export function revisionWatcherVitePlugin() {
   return {
     name: 'grammarwatch',
     enforce: 'post',
