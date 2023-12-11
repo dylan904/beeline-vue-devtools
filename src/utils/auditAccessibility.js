@@ -47,7 +47,7 @@ export function auditAccessibility(compEls) {
           const vEl = document.body.querySelector(node.target[0])
           const closestComponent = closestAncestor(vEl, compEls)
           //const otherClosestComponent = getClosestComponent(vEl);
-          console.log({ closestComponent, otherClosestComponent })
+          console.log({ closestComponent, /* , otherClosestComponent */ })
           if (!closestComponent)
             console.log('failtofind', vEl, violation)
           //else if (closestComponent !== otherClosestComponent)
