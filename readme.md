@@ -34,6 +34,25 @@ From your package.json, add one script:
 
 	"test:audit": "AUDITA11Y=1 ./node_modules/.bin/vue-devtools & npm run dev"
 
+ ## vite.config
+
+We'll want to pass along a few environment variables for useful context in the auditing process.
+
+If using vite, first import these lines:
+
+```js
+import { version } from './package.json'
+import { getRevisions } from 'beeline-vue-devtools/src/versioning'
+```
+
+Then, within defineConfig add:
+```js
+define: {
+	'process.env.version': '"' + version + '"',
+	'process.env.revisions': await getRevisions()
+},
+```
+
 # Usage
 
 	npm run test:audit
