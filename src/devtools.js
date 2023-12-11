@@ -23,10 +23,12 @@ const impactBGMap = {
     minor: 0xc9c8c7,
 }
 
-export function prepareAccessibilityAudit() {
-    devtools.connect()
+export function prepareAccessibilityAudit(router) {
+    if (process.env.AUDITA11Y)
+        devtools.connect()
+
     watch(compEls, (els) => {
-        auditAccessibility(els)
+        auditAccessibility(els, router)
     })
 }
 
@@ -163,13 +165,14 @@ function labelOtherImpacts(impactArray, isAgg) {
 }
 
 export const DevtoolsPlugin = {
-    install: (app) => {
-        app.provide('componentEls', compEls)
+    install: (app, opts) => {
+
         setupDevtoolsPlugin({
-            id: 'beeline-a11y-plugin',
+            id: 'beeline-ay-plugin',
             label: 'Beeline A11y',
             app,
         }, async (api) => {
+            console.log({api, app, opts})
             const componentInstances = await api.getComponentInstances(app)
             let violators = []
             const pending = ref({ value: true })
@@ -222,6 +225,7 @@ export const DevtoolsPlugin = {
                             const violator = violators.find(violator => violator.name === componentName)
                             const instanceId = 'instance-' + random + '-' + uid
                             const instanceViolation = {
+                                selector: node.target[0],
                                 id: instanceId,
                                 tags: [],
                                 children: [
@@ -306,10 +310,13 @@ export const DevtoolsPlugin = {
 
             api.on.getInspectorState(payload => {
                 if (payload.inspectorId === 'test-inspector') {
+                    console.log('inspect', payload.nodeId)
                     if (typeof payload.nodeId === 'string') {
                         let nodeId
                         if (payload.nodeId.includes('instance')) {
                             nodeId = payload.nodeId.split('-')[2]
+
+                            console.log('sel', payload)
                         } else {
                             nodeId = payload.nodeId.split('-')[0]
                             const violation = getViolation(payload.nodeId, violators)
@@ -321,7 +328,7 @@ export const DevtoolsPlugin = {
                                 'Accessibility Violation Info': ['impact', 'id', 'description', 'help', 'helpUrl'].map(key => ({
                                     key: key,
                                     value: violation[key],
-                                })),
+                                }))
                             }
                         }
 
