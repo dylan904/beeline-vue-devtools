@@ -8,6 +8,13 @@ import { getBridge, useBridge } from './features/bridge'
 import { auditAccessibility } from './utils/auditAccessibility'
 import devtools from '@vue/devtools'
 
+if (import.meta.hot) {
+    import.meta.hot.on('revisions-update', revisions => {
+        console.log('revisions-update', JSON.parse(JSON.stringify(process.env.revisions)), revisions)
+        process.env.revisions = revisions
+    })
+}
+
 const compEls = ref({ value: [] })
 
 const impactTextMap = {
