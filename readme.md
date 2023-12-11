@@ -45,11 +45,21 @@ import { version } from './package.json'
 import { getRevisions } from 'beeline-vue-devtools/src/versioning'
 ```
 
-Then, within defineConfig add:
+Then, wrap defineConfig with an async function
+
+```js
+export default async () => {
+  return defineConfig({ ... })
+}
+```
+
+Last, within defineConfig add:
 ```js
 define: {
+	'process.env.NODE_ENV': '"' + process.env.NODE_ENV + '"',
 	'process.env.version': '"' + version + '"',
-	'process.env.revisions': await getRevisions()
+	'process.env.revisions': await getRevisions(),
+	'process.env.AUDITA11Y': process.env.AUDITA11Y
 },
 ```
 
