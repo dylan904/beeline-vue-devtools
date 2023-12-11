@@ -1,6 +1,5 @@
 import path from 'path'
 import fs from 'fs'
-import packageJSON from '../package.json'
 import { promisify } from 'util'
 import { exec } from 'child_process' 
 
@@ -48,5 +47,3 @@ async function getModifiedInfo(filePath, exec) {
   }
   return null
 }
-
-export const version = packageJSON.version
