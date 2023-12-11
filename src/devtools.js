@@ -168,7 +168,7 @@ export const DevtoolsPlugin = {
     install: (app, opts) => {
 
         setupDevtoolsPlugin({
-            id: 'beeline-ay-plugin',
+            id: 'beeline-a11y-plugin',
             label: 'Beeline A11y',
             app,
         }, async (api) => {
