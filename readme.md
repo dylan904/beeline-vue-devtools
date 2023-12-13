@@ -23,8 +23,8 @@ app.use(DevtoolsPlugin)
 Last, at the bottom of the page, add this code block:
 
 ```js
-if (process.env.NODE_ENV === 'development' && process.env.AUDITA11Y) {
-	prepareAccessibilityAudit()
+if (import.meta.env.DEV && process.env.AUDITA11Y) {
+	prepareAccessibilityAudit(router)
 }
 ```
 
@@ -56,10 +56,10 @@ export default async () => {
 Within defineConfig add:
 ```js
 define: {
-	'process.env.NODE_ENV': '"' + process.env.NODE_ENV + '"',
+	'process.env.project': '"' + packageJSON.name + '"',
 	'process.env.version': '"' + packageJSON.version + '"',
-	'process.env.revisions': await getRevisions(),
-	'process.env.AUDITA11Y': process.env.AUDITA11Y
+      	'process.env.revisions': await getRevisions(),
+      	'process.env.AUDITA11Y': process.env.AUDITA11Y
 },
 ```
 
