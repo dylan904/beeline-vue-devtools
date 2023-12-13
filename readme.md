@@ -41,7 +41,7 @@ We'll want to pass along a few environment variables for useful context in the a
 Inside your vite config file, import these lines:
 
 ```js
-import { version } from './package.json'
+import packageJSON from './package.json' assert {type: 'json'}
 import { getRevisions } from 'beeline-vue-devtools/src/versioning'
 ```
 
@@ -57,7 +57,7 @@ Last, within defineConfig add:
 ```js
 define: {
 	'process.env.NODE_ENV': '"' + process.env.NODE_ENV + '"',
-	'process.env.version': '"' + version + '"',
+	'process.env.version': '"' + packageJSON.version + '"',
 	'process.env.revisions': await getRevisions(),
 	'process.env.AUDITA11Y': process.env.AUDITA11Y
 },
