@@ -45,7 +45,7 @@ import { version } from './package.json'
 import { getRevisions } from 'beeline-vue-devtools/src/versioning'
 ```
 
-Then, wrap defineConfig with an async function
+Then, wrap defineConfig with an async function:
 
 ```js
 export default async () => {
