@@ -42,7 +42,7 @@ Inside your vite config file, import these lines:
 
 ```js
 import packageJSON from './package.json' assert {type: 'json'}
-import { getRevisions } from 'beeline-vue-devtools/src/versioning'
+import { getRevisions, revisionWatcherVitePlugin } from 'beeline-vue-devtools/src/versioning.js'
 ```
 
 Then, wrap defineConfig with an async function:
@@ -53,7 +53,7 @@ export default async () => {
 }
 ```
 
-Last, within defineConfig add:
+Within defineConfig add:
 ```js
 define: {
 	'process.env.NODE_ENV': '"' + process.env.NODE_ENV + '"',
@@ -61,6 +61,14 @@ define: {
 	'process.env.revisions': await getRevisions(),
 	'process.env.AUDITA11Y': process.env.AUDITA11Y
 },
+```
+
+Last, within defineConfig plugins add:
+```js
+plugins: [
+      // vue(),
+      revisionWatcherVitePlugin()
+],
 ```
 
 # Usage
