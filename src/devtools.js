@@ -63,12 +63,14 @@ export const DevtoolsPlugin = {
                 if (payload.inspectorId === inspectorId) {
                     violators.length = 0  // reset, empty array
                     await setInspectorTree(payload, api, violators, violationsRef.value)
+                    console.log('mytree was set', payload)
                 }
             })
 
             api.on.getInspectorState(async payload => {
                 if (payload.inspectorId === inspectorId) {
                     await setInspectorState(payload, api, violators, violationsRef.value, componentInstances)
+                    console.log('mytree was set', payload)
                 }
             })
 
