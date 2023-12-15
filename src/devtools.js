@@ -59,7 +59,7 @@ export const DevtoolsPlugin = {
             compEls.value = relevantComponentInstances.map(instance => instance.subTree.el)
 
             api.on.getInspectorTree(async payload => {
-                console.log('set mytree', inspectorId)
+                console.log('set mytree', inspectorId, JSON.parse(JSON.stringify(payload)))
                 if (payload.inspectorId === inspectorId) {
                     violators.length = 0  // reset, empty array
                     await setInspectorTree(payload, api, violators, violationsRef.value)
@@ -70,7 +70,6 @@ export const DevtoolsPlugin = {
             api.on.getInspectorState(async payload => {
                 if (payload.inspectorId === inspectorId) {
                     await setInspectorState(payload, api, violators, violationsRef.value, componentInstances)
-                    console.log('mytree was set', payload)
                 }
             })
 
