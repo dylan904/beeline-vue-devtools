@@ -18,12 +18,11 @@ export default async function scan(router, violations, firstRun) {
     const { altered } = appendViolations(violations, result.violations)
     if (altered) {
       if (!cosmosSingleton.getContainer()) {
-        testlabel:
         try {
           await cosmosSingleton.initialize()
         } catch (e) {
           console.error(e)
-          break testlabel
+          return result
         }
       }
         
@@ -46,7 +45,7 @@ export default async function scan(router, violations, firstRun) {
           "value": violations
         }])
       }
-      
+
       window.violations = violations  // temporary transparency
   
       if (firstRun) {
