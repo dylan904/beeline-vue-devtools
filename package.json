@@ -1,6 +1,6 @@
 {
   "name": "beeline-vue-devtools",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "type": "module",
   "description": "",
   "main": "index.js",
@@ -10,7 +10,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@vue/devtools": "^6.5.1"
+    "@vue/devtools": "^6.5.1",
+    "uuid": "^9.0.1",
+    "@azure/cosmos": "^4.0.0"
   },
   "devDependencies": {
     

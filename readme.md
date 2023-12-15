@@ -9,7 +9,7 @@ This plugin in its current state is designed to help debug **accessibility** iss
 We are going to import the plugin and preparation function:
 
 ```js
-import { DevtoolsPlugin, prepareAccessibilityAudit } from 'beeline-vue-devtools/src/devtools'
+import { DevtoolsPlugin, prepareA11YAudit } from 'beeline-vue-devtools/src/devtools'
 ```
 
 Then, after the app is created we have it use our plugin:
@@ -24,7 +24,7 @@ Last, at the bottom of the page, add this code block:
 
 ```js
 if (import.meta.env.DEV && process.env.AUDITA11Y) {
-	prepareAccessibilityAudit(router)
+    prepareA11YAudit(router)
 }
 ```
 
@@ -32,7 +32,7 @@ if (import.meta.env.DEV && process.env.AUDITA11Y) {
 
 From your package.json, add one script:
 
-	"test:audit": "AUDITA11Y=1 ./node_modules/.bin/vue-devtools & npm run dev"
+	"test:audit": "./node_modules/.bin/vue-devtools & AUDITA11Y=1 npm run dev"
 
  ## vite.config
 
@@ -49,14 +49,14 @@ Then, wrap defineConfig with an async function:
 
 ```js
 export default async () => {
-  return defineConfig({ ... })
+    return defineConfig({ ... })
 }
 ```
 
 Within defineConfig add:
 ```js
 define: {
-	'process.env.project': '"' + packageJSON.name + '"',
+    'process.env.project': '"' + packageJSON.name + '"',
     'process.env.version': '"' + packageJSON.version + '"',
     'process.env.revisions': await getRevisions(),
     'process.env.AUDITA11Y': process.env.AUDITA11Y
