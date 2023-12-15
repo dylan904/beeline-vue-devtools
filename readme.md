@@ -9,7 +9,7 @@ This plugin in its current state is designed to help debug **accessibility** iss
 We are going to import the plugin and preparation function:
 
 ```js
-import { DevtoolsPlugin, prepareAccessibilityAudit } from 'beeline-vue-devtools/src/devtools'
+import { DevtoolsPlugin, prepareA11YAudit } from 'beeline-vue-devtools/src/devtools'
 ```
 
 Then, after the app is created we have it use our plugin:
@@ -24,7 +24,7 @@ Last, at the bottom of the page, add this code block:
 
 ```js
 if (import.meta.env.DEV && process.env.AUDITA11Y) {
-    prepareAccessibilityAudit(router)
+    prepareA11YAudit(router)
 }
 ```
 
