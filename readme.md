@@ -71,6 +71,12 @@ plugins: [
 ],
 ```
 
+## .env or .env.development.local
+
+    VITE_A11Y_COSMOS_CONNECTION_STRING="YOUR_COSMOS_CONNECTION_STRING"
+    
+Obtain your Cosmos DB connection string [here](https://portal.azure.com/#@beelineco.onmicrosoft.com/resource/subscriptions/c40fc505-7ef8-48d0-beb1-1ad31231db6a/resourcegroups/rg-a11y-scus/providers/Microsoft.DocumentDB/databaseAccounts/beeline-a11y-audits-scus/Connection%20strings)
+
 # Usage
 
 	npm run test:audit
