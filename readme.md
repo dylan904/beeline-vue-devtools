@@ -24,7 +24,7 @@ Last, at the bottom of the page, add this code block:
 
 ```js
 if (import.meta.env.DEV && process.env.AUDITA11Y) {
-	prepareAccessibilityAudit(router)
+    prepareAccessibilityAudit(router)
 }
 ```
 
@@ -49,7 +49,7 @@ Then, wrap defineConfig with an async function:
 
 ```js
 export default async () => {
-	return defineConfig({ ... })
+    return defineConfig({ ... })
 }
 ```
 
