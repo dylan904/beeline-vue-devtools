@@ -10,7 +10,12 @@ class CosmosSingleton {
 
   async initialize() {
     if (!this.database || !this.container) {
-      const client = new CosmosClient(import.meta.env.VITE_A11Y_COSMOS_CONNECTION_STRING);
+      const a11YCosmosConnectionString = import.meta.env.VITE_A11Y_COSMOS_CONNECTION_STRING
+      if (!a11YCosmosConnectionString) {
+        throw new Error('No Cosmos DB connection string provided in env variable: VITE_A11Y_COSMOS_CONNECTION_STRING');
+      }
+
+      const client = new CosmosClient(a11YCosmosConnectionString);
       const { database } = await client.databases.createIfNotExists({ id: process.env.project })
       const { container } = await database.containers.createIfNotExists({ id: process.env.version })
       //const { container } = await database.containers.createIfNotExists({ id: "Violations" })
