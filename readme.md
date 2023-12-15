@@ -32,7 +32,7 @@ if (import.meta.env.DEV && process.env.AUDITA11Y) {
 
 From your package.json, add one script:
 
-	"test:audit": "AUDITA11Y=1 ./node_modules/.bin/vue-devtools & npm run dev"
+	"test:audit": "./node_modules/.bin/vue-devtools & AUDITA11Y=1 npm run dev"
 
  ## vite.config
 
