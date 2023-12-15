@@ -56,10 +56,10 @@ export default async () => {
 Within defineConfig add:
 ```js
 define: {
-	'process.env.project': '"' + packageJSON.name + '"',
-	'process.env.version': '"' + packageJSON.version + '"',
-	'process.env.revisions': await getRevisions(),
-	'process.env.AUDITA11Y': process.env.AUDITA11Y
+    'process.env.project': '"' + packageJSON.name + '"',
+    'process.env.version': '"' + packageJSON.version + '"',
+    'process.env.revisions': await getRevisions(),
+    'process.env.AUDITA11Y': process.env.AUDITA11Y
 },
 ```
 
