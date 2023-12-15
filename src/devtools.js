@@ -28,7 +28,7 @@ export async function prepareA11YAudit(router) {
     script.onload = async () => {
         watch(compEls, async els => {
             await auditA11Y(els, router, violationsRef.value)
-            console.log('try send mytree', devtoolsAPI)
+            console.log('try send mytree', violationsRef.value, devtoolsAPI)
             if (devtoolsAPI)
                 devtoolsAPI.sendInspectorTree(inspectorId)
         })
@@ -37,6 +37,7 @@ export async function prepareA11YAudit(router) {
             async newRoute => {
                 violationsRef.value = []
                 await auditA11Y(compEls.value, router, violationsRef.value)
+                console.log('try send mytree', violationsRef.value, devtoolsAPI)
                 if (devtoolsAPI)
                     devtoolsAPI.sendInspectorTree(inspectorId)
             }
