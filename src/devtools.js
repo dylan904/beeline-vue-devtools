@@ -63,7 +63,7 @@ export const DevtoolsPlugin = {
                     violators.length = 0  // reset, empty array
                     console.log('set mytree', JSON.parse(JSON.stringify(payload.rootNodes)), JSON.parse(JSON.stringify(violators)), JSON.parse(JSON.stringify(violationsRef.value)))
                     await setInspectorTree(payload, api, violators, violationsRef.value)
-                    console.log('mytree was set', SON.parse(JSON.stringify(payload.rootNodes)), SON.parse(JSON.stringify(violators)), SON.parse(JSON.stringify(violationsRef.value)))
+                    console.log('mytree was set', JSON.parse(JSON.stringify(payload.rootNodes)), JSON.parse(JSON.stringify(violators)), JSON.parse(JSON.stringify(violationsRef.value)))
                 }
             })
 
