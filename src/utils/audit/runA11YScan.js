@@ -26,24 +26,26 @@ export default async function scan(router, violations, firstRun) {
         }
       }
         
-      const qResult = await cosmosSingleton.queryViolations(urlKey)
-      const recordedViolations = qResult.violations || []
-      console.log('testdbd', process.env.version, urlKey, recordedViolations, qResult)
-      const recordedViolationCount = recordedViolations.length
-      const { altered, ops } = appendViolations(recordedViolations, violations, qResult.id)
-  
-      if (recordedViolationCount) {
-        if (altered) 
-          cosmosSingleton.updateViolations(qResult.id, ops)
-      }
-      else {
-        const container = cosmosSingleton.getContainer();
-        const item = container.item(qResult.id)
-        const { resource } = await item.patch([{ 
-          "op": "set", 
-          "path": "/violations", 
-          "value": violations
-        }])
+      if (import.meta.env.VITE_A11Y_COSMOS_CONNECTION_STRING) {
+        const qResult = await cosmosSingleton.queryViolations(urlKey)
+        const recordedViolations = qResult.violations || []
+        console.log('testdbd', process.env.version, urlKey, recordedViolations, qResult)
+        const recordedViolationCount = recordedViolations.length
+        const { altered, ops } = appendViolations(recordedViolations, violations, qResult.id)
+    
+        if (recordedViolationCount) {
+          if (altered) 
+            cosmosSingleton.updateViolations(qResult.id, ops)
+        }
+        else {
+          const container = cosmosSingleton.getContainer();
+          const item = container.item(qResult.id)
+          const { resource } = await item.patch([{ 
+            "op": "set", 
+            "path": "/violations", 
+            "value": violations
+          }])
+        }
       }
 
       window.violations = violations  // temporary transparency

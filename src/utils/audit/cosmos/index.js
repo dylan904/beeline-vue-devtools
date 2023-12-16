@@ -2,6 +2,8 @@ import { CosmosClient } from "@azure/cosmos"
 import queryViolations from "./queryViolations";
 import updateViolations from "./updateViolations";
 
+const a11YCosmosConnectionString = import.meta.env.VITE_A11Y_COSMOS_CONNECTION_STRING
+
 class CosmosSingleton {
   constructor() {
     this.database = null
@@ -10,18 +12,13 @@ class CosmosSingleton {
 
   async initialize() {
     if (!this.database || !this.container) {
-      const a11YCosmosConnectionString = import.meta.env.VITE_A11Y_COSMOS_CONNECTION_STRING
       if (!a11YCosmosConnectionString) {
-        throw new Error('No Cosmos DB connection string provided in env variable: VITE_A11Y_COSMOS_CONNECTION_STRING');
+        throw new Error('No Cosmos DB connection string provided in env variable: VITE_A11Y_COSMOS_CONNECTION_STRING')
       }
 
       const client = new CosmosClient(a11YCosmosConnectionString);
-      const { database } = await client.databases.createIfNotExists({ id: process.env.project })
-      const { container } = await database.containers.createIfNotExists({ id: process.env.version })
-      //const { container } = await database.containers.createIfNotExists({ id: "Violations" })
-
-      this.database = database
-      this.container = container
+      this.database = await client.databases.createIfNotExists({ id: process.env.project }).database
+      this.container = await this.database.containers.createIfNotExists({ id: process.env.version })
     }
   }
 
