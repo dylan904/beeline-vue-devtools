@@ -11,9 +11,9 @@ export default async function setInspectorState(payload, api, violators, violati
             console.log('sel', payload)
         } else {
             nodeId = payload.nodeId.split('-')[0]
-            const violation = getViolation(payload.nodeId, violators)
+            const violation = getViolation(payload.nodeId, violators, violations)
             if (!violation) {
-                console.error('no matching violation found', payload.nodeId, violators, violations.value)
+                console.error('no matching violation found', payload.nodeId, violators, violations)
                 return
             }
             payload.state = {
