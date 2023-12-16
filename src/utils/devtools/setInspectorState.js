@@ -25,8 +25,27 @@ export default async function setInspectorState(payload, api, violators, violati
         }
 
         const instance = componentInstances.find(instance => instance.uid.toString() === nodeId)
+        console.log('instance', instance)
         if (instance) {
             api.highlightElement(instance)
+
+            const propsToCheck = ['props', 'setupProps', 'data'].filter(prop => instance.hasOwnProperty(prop))
+            const state = {}
+            
+            for (const prop of propsToCheck) {
+                const itemEntries = Object.entries(instance[prop])
+                if (itemEntries.length) {
+                    const displayItems = []
+                    
+                    for (const [itemName, itemValue] of itemEntries) {
+                        displayItems.push({ key: itemName, value: itemValue })
+                    }
+                    state[prop] = displayItems
+                }
+            }
+
+            payload.state = state
+
         } else {
             console.log('cant highlight', nodeId)
         }
