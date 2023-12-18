@@ -1,106 +1,52 @@
-import getClosestComponentInstance from './getClosestComponentInstance'
 import labelOtherImpacts from './labelOtherImpacts'
-import tallyInstanceOccurence from './tallyInstanceOccurance'
-import { impactTextMap, impactBGMap } from './colorMaps'
+import ViolationTally from './violationTally'
 import sortViolators from './sortViolators'
+import generatePayloadFromViolation from './generatePayloadFromViolation'
 
-export default async function setInspectorTree(payload, api, violators, violations) {
+let lastViolations
+let lastRootNodes
+
+export default async function setInspectorTree(payload, api, violatorsRef, violations, componentInstances) {
     if (!violations) {
         console.error('No violations...')
         return
+    } else if (violations === lastViolations) {
+        payload.rootNodes = lastRootNodes
+        console.log('findme: blocked')
+        return
     }
+
+    lastViolations = violations
+    violatorsRef.value = []
+    const violators = violatorsRef.value
+    const violatorNodes = []
 
     for (const violation of violations) {
         for (const node of violation.nodes) {
-            // const closestComponentInstance = closestAncestor(vEl, relevantComponentInstances) || { uid: -1, type: { name: 'ROOT' } }
-            const closestComponentInstance = getClosestComponentInstance(node.target[0])
-            const componentName = await api.getComponentName(closestComponentInstance)
-            const uid = closestComponentInstance.uid
-            const random = Math.floor(Math.random() * (9999 - 1000 + 1) + 1000)
-
-            const uniqueViolation = {
-                id: uid + '-' + random + '-' + violation.id,
-                uid: uid,
-                label: violation.id,
-                occurences: 1,
-                tags: [
-                    {
-                        impact: violation.impact,
-                        label: violation.impact,
-                        textColor: impactTextMap[violation.impact],
-                        backgroundColor: impactBGMap[violation.impact],
-                    },
-                ],
-            }
-
-            const violator = violators.find(violator => violator.name === componentName)
-            const instanceId = 'instance-' + random + '-' + uid
-            const instanceViolation = {
-                selector: node.target[0],
-                id: instanceId,
-                tags: [],
-                children: [
-                    uniqueViolation
-                ],
-            }
-
-            if (!violator) {
-                if (!componentName) {
-                    console.log('noname?', closestComponentInstance)
-                }
-                instanceViolation.label = 'Instance #1'
-                violators.push({
-                    id: uid,
-                    name: componentName,
-                    instanceIds: [uid],
-                    label: '<' + componentName + '>',
-                    color: 0xFF0000,
-                    textColor: 0x00FF00,
-                    tags: [],
-                    children: [
-                        {
-                            uid: uid + '-agg',
-                            label: 'Aggregate',
-                            children: [JSON.parse(JSON.stringify(uniqueViolation))]
-                        },
-                        {
-                            uid: uid + '-instances',
-                            label: 'Instances',
-                            children: [instanceViolation]
-                        }
-                    ]
-                })
-            } else {
-                const instanceViolations = violator.children.find(v => v.label === 'Instances').children
-                const aggViolations = violator.children.find(v => v.label === 'Aggregate').children
-                const existingInstanceViolation = instanceViolations.find(v => Number(v.id.split('-')[2]) === uid)
-
-                if (existingInstanceViolation) {
-                    const existingUniqueViolation = existingInstanceViolation.children.find(child => child.label === violation.id)
-                    tallyInstanceOccurence(existingUniqueViolation)
-                } else {
-                    instanceViolations.push(instanceViolation)
-                }
-
-                const existingAggViolation = aggViolations.find(v => v.label === violation.id)
-                if (existingAggViolation) {
-                    tallyInstanceOccurence(existingAggViolation, true)
-                }
-                else {
-                    const uniqueViolationCopy = JSON.parse(JSON.stringify(uniqueViolation))
-                    uniqueViolationCopy.id = uid + '-' + random + '-' + violation.id + '-agg'    // needs unique id
-                    uniqueViolationCopy.occurences = 1
-                    aggViolations.push(uniqueViolationCopy)
-                }
-                instanceViolation.label = 'Instance #' + instanceViolations.length
-            }
+            await generatePayloadFromViolation(violation, node, violatorNodes, api)
         }
     }
 
-    labelOtherImpacts(violators, true)
-    for (const violator of violators) {
-        labelOtherImpacts(violator.children.find(v => v.label === 'Instances').children, false)
-    }
+    const vTally = new ViolationTally()
+    await vTally.init(componentInstances, violations, api)
+    labelOtherImpacts(violatorNodes, 'component', vTally)
 
-    payload.rootNodes = sortViolators(violators)
+    for (const violatorNode of violatorNodes) {
+        const instances = violatorNode.children.find(c => c.label === 'Instances').children
+        
+        if (!violators.find(v => v.id === violatorNode.id)) {
+            const componentName = await vTally.getComponentNameById(instances[0].instanceId)
+            violators.push({
+                id: violatorNode.id,
+                instanceIds: instances.map(i => i.instanceId),
+                name: componentName,
+                violations: vTally.getComponentViolations(componentName).violations,
+                instances: instances.map(i => ({ id: i.instanceId, selector: i.selector, violations: vTally.getInstanceViolations(i.instanceId) }))
+            })
+        }
+        labelOtherImpacts(instances, 'instance', vTally)
+    }
+    
+    payload.rootNodes = sortViolators(violatorNodes)
+    lastRootNodes = payload.rootNodes
 }

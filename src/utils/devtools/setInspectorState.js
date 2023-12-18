@@ -1,77 +1,65 @@
-import getViolatingComponents from './getViolatingComponents'
-import getViolation from './getViolation'
+import highlighterSingleton from './highlighter'
 
-export default async function setInspectorState(payload, api, violators, violations, componentInstances) {
-    console.log('inspect', payload.nodeId)
+export default async function setInspectorState(payload, api, violators, violations, componentInstances, relevantComponentInstances) {
+    highlighterSingleton.clear()
+    
     if (typeof payload.nodeId === 'string') {
         let nodeId
+        const splitId = payload.nodeId.split('-')
+        
         if (payload.nodeId.includes('instance')) {
-            nodeId = payload.nodeId.split('-')[2]
-
-            console.log('sel', payload)
+            nodeId = splitId[2]
         } else {
-            nodeId = payload.nodeId.split('-')[0]
-            const violation = getViolation(payload.nodeId, violators, violations)
+            nodeId = splitId[0]
+            const vId = splitId.slice(2).join('-').replace('-agg', '')
+            const violation = violations.find(v => v.id === vId)
+
             if (!violation) {
-                console.error('no matching violation found', payload.nodeId, violators, violations)
+                console.error('no matching violation found', {nodeId, 'payload.nodeId': payload.nodeId, violators, violations, relevantComponentInstances, componentInstances})
                 return
             }
+
+            const applicableFixes = getApplicableFixes(violation) 
             payload.state = {
-                'Accessibility Violation Info': ['impact', 'id', 'description', 'help', 'helpUrl'].map(key => ({
+                'Accessibility Violation Overview': ['impact', 'id', 'description', 'help', 'helpUrl'].map(key => ({
                     key: key,
                     value: violation[key],
-                }))
+                })),
+                ...applicableFixes
             }
+            return
         }
 
         const instance = componentInstances.find(instance => instance.uid.toString() === nodeId)
-        console.log('instance', instance)
         if (instance) {
-            api.highlightElement(instance)
-
+            tryHighlightComponent(highlighterSingleton, instance, api)
             const propsToCheck = ['props', 'setupProps', 'data'].filter(prop => instance.hasOwnProperty(prop))
             const state = {}
-            
+
             for (const prop of propsToCheck) {
                 const itemEntries = Object.entries(instance[prop])
                 if (itemEntries.length) {
                     const displayItems = []
-                    
                     for (const [itemName, itemValue] of itemEntries) {
                         displayItems.push({ key: itemName, value: itemValue })
                     }
                     state[prop] = displayItems
                 }
             }
-
             payload.state = state
 
         } else {
-            console.log('cant highlight', nodeId)
+            console.log('cant highlight, no instance', nodeId, instance)
         }
     } else {
-        const violatingInstances = getViolatingComponents(payload.nodeId, violators, componentInstances)
-
+        const componentId = payload.nodeId
+        const violatingInstances = violators.find(v => v.id === componentId).instances
         if (violatingInstances.length) {
             for (const violatingInstance of violatingInstances) {
-                api.highlightElement(violatingInstance)
+                //api.highlightElement(violatingInstance)
+                console.log('highlight', violatingInstance)
+                highlighterSingleton.highlightComponent(violatingInstance.id)
             }
-        }
-
-        // placeholder
-        payload.state = {
-            'child info': [
-                {
-                    key: 'answer',
-                    value: {
-                        _custom: {
-                            display: '42!!!',
-                            value: 42,
-                            tooltip: 'The answer',
-                        }
-                    }
-                }
-            ]
         }
     }
 }

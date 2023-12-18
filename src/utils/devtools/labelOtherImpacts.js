@@ -1,23 +1,19 @@
 import { impactTextMap, impactBGMap } from './colorMaps'
 
-export default function labelOtherImpacts(impactArray, isAgg) {
-    for (const item of impactArray) {
-        const impactCounts = {
-            critical: 0,
-            serious: 0,
-            moderate: 0,
-            minor: 0
+export default async function labelOtherImpacts(impactArray, type, vTally) {
+    for (const impactItem of impactArray) {
+        let impactCounts
+        if (type.toLowerCase() === 'component') {
+            impactCounts = await vTally.getComponentViolations(impactItem.name).totals
         }
-
-        const violations = isAgg ? item.children.find(child => child.label === 'Aggregate').children : item.children
-        for (const violation of violations) {
-            const impact = violation.tags.find(tag => tag.impact).impact
-            impactCounts[impact] += violation.occurences
-        }
+        else if (type.toLowerCase() === 'instance')
+            impactCounts = await vTally.getInstanceViolations(impactItem.instanceId).totals
+        else 
+            throw('type incorrect parameter: "' + type + '" in labelOtherImpacts()')
 
         for (const [label, count] of Object.entries(impactCounts)) {
             if (count) {
-                item.tags.push({
+                impactItem.tags.push({
                     label: label + ' (x' + count + ')',
                     textColor: impactTextMap[label],
                     backgroundColor: impactBGMap[label],
