@@ -1,4 +1,3 @@
-
 import { ref, watch } from 'vue'
 import devtools from '@vue/devtools'
 import { setupDevtoolsPlugin } from '@vue/devtools-api'
@@ -11,7 +10,6 @@ import setInspectorTree from './utils/devtools/setInspectorTree'
 
 if (import.meta.hot) {
     import.meta.hot.on('revisions-update', revisions => {
-        console.log('revisions-update', JSON.parse(JSON.stringify(process.env.revisions)), revisions)
         process.env.revisions = revisions
     })
 }
@@ -22,7 +20,6 @@ const inspectorId = 'bln-a11y'
 let devtoolsAPI
 const violatorsRef = ref([])
 let init = false
-window.violations = violationsRef.value
 
 export async function prepareA11YAudit(router) {
     if (process.env.AUDITA11Y)
@@ -33,7 +30,6 @@ export async function prepareA11YAudit(router) {
         init = true
         watch(compEls, async els => {
             await auditA11Y(els, router, violationsRef.value)
-            console.log('try send mytree', violationsRef.value, devtoolsAPI)
             if (devtoolsAPI)
                 devtoolsAPI.sendInspectorTree(inspectorId)
         })
@@ -42,7 +38,6 @@ export async function prepareA11YAudit(router) {
             async newRoute => {
                 violationsRef.value = []
                 await auditA11Y(compEls.value, router, violationsRef.value)
-                console.log('try send mytree', violationsRef.value, devtoolsAPI)
                 if (devtoolsAPI)
                     devtoolsAPI.sendInspectorTree(inspectorId)
             }
@@ -58,17 +53,13 @@ export const DevtoolsPlugin = {
             app,
         }, async (api) => {
             devtoolsAPI = api
-            
             const componentInstances = await api.getComponentInstances(app)
-            window.componentInstances = componentInstances
             const relevantComponentInstances = componentInstances.filter(instance => instance.type.__file && instance.subTree.el.nodeType === 1)
             compEls.value = relevantComponentInstances.map(instance => instance.subTree.el)
 
             api.on.getInspectorTree(async payload => {
                 if (payload.inspectorId === inspectorId && init) {
-                    console.log('set mytree', JSON.parse(JSON.stringify(payload)), JSON.parse(JSON.stringify(violatorsRef.value)), JSON.parse(JSON.stringify(violationsRef.value)))
                     await setInspectorTree(payload, api, violatorsRef, violationsRef.value, componentInstances)
-                    console.log('mytree was set', JSON.parse(JSON.stringify(payload)), JSON.parse(JSON.stringify(violatorsRef.value)), JSON.parse(JSON.stringify(violationsRef.value)))
                 }
             })
 
