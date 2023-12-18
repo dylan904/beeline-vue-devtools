@@ -39,7 +39,7 @@ class HighlighterSingleton {
 
     #getComponentElement(componentInstanceId, allEls = [...document.querySelectorAll('body *')]) {
         for (var el of allEls) {
-            if (el.__vueParentComponent?.uid === componentId)
+            if (el.__vueParentComponent?.uid === componentInstanceId)
                 return el
         }
     }
