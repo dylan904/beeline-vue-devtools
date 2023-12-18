@@ -5,9 +5,9 @@ import { setupDevtoolsPlugin } from '@vue/devtools-api'
 import auditA11Y from './utils/audit'
 import getInspectorActions from './utils/devtools/getInspectorActions'
 import getInspectorNodeActions from './utils/devtools/getInspectorNodeActions'
-import createAxeScript from 'beeline-vue-devtools/src/utils/audit/createAxeScript'
-import setInspectorState from './setInspectorState'
-import setInspectorTree from './setInspectorTree'
+import createAxeScript from './utils/audit/createAxeScript'
+import setInspectorState from './utils/devtools/setInspectorState'
+import setInspectorTree from './utils/devtools/setInspectorTree'
 
 if (import.meta.hot) {
     import.meta.hot.on('revisions-update', revisions => {
