@@ -1,13 +1,15 @@
 export default class ViolationTally {
     #componentInstances
     #violations
+    #api
     
-    constructor(componentInstances, violations) {
+    async init(componentInstances, violations, api) {
         this.#componentInstances = componentInstances
         this.#violations = violations
+        this.#api = api
         this.tally = {
             instances: this.#getAllInstanceViolations(),
-            components: this.#getAllComponentViolations()
+            components: await this.#getAllComponentViolations()
         }
     }
 
@@ -37,26 +39,10 @@ export default class ViolationTally {
         return instanceViolations
     }
 
-    getInstanceComponentName(componentInstance) {
-        if (!componentInstance.type)
-            console.log('wtf', componentInstance)
-
-        const type = componentInstance.type
-        if (!type)
-            return 'ROOT'
-        const nameFromNameProp = type.name || type.__name
-        if (nameFromNameProp)
-            return nameFromNameProp
-        console.log('cfile', type.__file)
-        const fileName = type.__file.split('/').slice(-1)[0]
-        const dotSplit = fileName.split('.')
-        dotSplit.pop()
-        return dotSplit.join('.')
-    }
-
-    getComponentNameById(id) {
+    async getComponentNameById(id) {
         const instance = this.#componentInstances.find(i => i.uid === id)
-        return this.getInstanceComponentName(instance)
+        console.log('try 1', id, instance, this.#componentInstances)
+        return await this.#api.getComponentName(instance)
     }
 
     #incrementIfMatched(violation, matchCount, matchingVs) {
@@ -71,17 +57,22 @@ export default class ViolationTally {
         }
     }
 
-    #getAllComponentViolations() {
+    async #getAllComponentViolations() {
         const componentViolations = {}
         for (const instance of this.#componentInstances) {
-            const componentName = this.getInstanceComponentName(instance)
+            console.log('try 2')
+            const componentName = await this.#api.getComponentName(instance)
             const matchingVs = {
                 totals: { minor: 0, moderate: 0, serious: 0, critical: 0 },
                 violations: {}
             }
 
             for (const violation of this.#violations) {
-                const violationMatches = violation.nodes.filter(n => this.getComponentNameById(n.componentInstanceId) === componentName)
+                console.log('try x', JSON.parse(JSON.stringify(violation.nodes)))
+                const violationMatches = violation.nodes.filter(async n => {
+                    console.log('testme', n.componentInstanceId, await this.getComponentNameById(n.componentInstanceId))
+                    return await this.getComponentNameById(n.componentInstanceId) === componentName
+                })
                 this.#incrementIfMatched(violation, violationMatches.length, matchingVs)
             }
             componentViolations[componentName] = matchingVs
