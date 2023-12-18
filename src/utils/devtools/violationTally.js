@@ -41,7 +41,6 @@ export default class ViolationTally {
 
     async getComponentNameById(id) {
         const instance = this.#componentInstances.find(i => i.uid === id)
-        console.log('try 1', id, instance, this.#componentInstances)
         return await this.#api.getComponentName(instance)
     }
 
@@ -60,7 +59,6 @@ export default class ViolationTally {
     async #getAllComponentViolations() {
         const componentViolations = {}
         for (const instance of this.#componentInstances) {
-            console.log('try 2')
             const componentName = await this.#api.getComponentName(instance)
             const matchingVs = {
                 totals: { minor: 0, moderate: 0, serious: 0, critical: 0 },
@@ -68,9 +66,7 @@ export default class ViolationTally {
             }
 
             for (const violation of this.#violations) {
-                console.log('try x', JSON.parse(JSON.stringify(violation.nodes)))
                 const violationMatches = violation.nodes.filter(async n => {
-                    console.log('testme', n.componentInstanceId, await this.getComponentNameById(n.componentInstanceId))
                     return await this.getComponentNameById(n.componentInstanceId) === componentName
                 })
                 this.#incrementIfMatched(violation, violationMatches.length, matchingVs)

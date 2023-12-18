@@ -1,7 +1,6 @@
 import filterModifiedComponents from "./filterModifiedComponents"
 
 export default function appendViolations(targetViolations, srcViolations, id) {
-  console.log('append', targetViolations, srcViolations, id)
   let altered = false
   const ops = []
   for (const [vi, newV] of srcViolations.entries()) {
