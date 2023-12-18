@@ -24,7 +24,7 @@ class HighlighterSingleton {
         this.#create(element, '#00BFFF')
     }
 
-    highlightComponents(componentInstanceId) {
+    highlightComponent(componentInstanceId) {
         const element = this.#getComponentElement(componentInstanceId)
         if (element)
             this.#create(element, '#41B883')
