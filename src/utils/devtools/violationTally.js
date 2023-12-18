@@ -1,3 +1,8 @@
+const impacts = ['minor', 'moderate', 'serious', 'critical']
+const defaultImpactTally = Object.fromEntries(
+    impacts.map(impact => [impact, 0])
+)
+
 export default class ViolationTally {
     #componentInstances
     #violations
@@ -26,7 +31,7 @@ export default class ViolationTally {
         for (const instance of this.#componentInstances) {
             const iid = instance.uid
             const matchingVs = {
-                totals: { minor: 0, moderate: 0, serious: 0, critical: 0 },
+                totals: copy(defaultImpactTally),
                 violations: {}
             }
 
@@ -58,21 +63,28 @@ export default class ViolationTally {
 
     async #getAllComponentViolations() {
         const componentViolations = {}
+        
         for (const instance of this.#componentInstances) {
             const componentName = await this.#api.getComponentName(instance)
             const matchingVs = {
-                totals: { minor: 0, moderate: 0, serious: 0, critical: 0 },
+                totals: copy(defaultImpactTally),
                 violations: {}
             }
 
             for (const violation of this.#violations) {
-                const violationMatches = violation.nodes.filter(async n => {
-                    return await this.getComponentNameById(n.componentInstanceId) === componentName
-                })
-                this.#incrementIfMatched(violation, violationMatches.length, matchingVs)
+                for (const node of violation.nodes) {
+                    const nodeComponentName = await this.getComponentNameById(node.componentInstanceId)
+                    const matchCount = nodeComponentName === componentName ? 1 : 0
+                    this.#incrementIfMatched(violation, matchCount, matchingVs);
+                }
             }
             componentViolations[componentName] = matchingVs
         }
+
         return componentViolations
     }
+}
+
+function copy(data) {
+    return JSON.parse(JSON.stringify(data))
 }
