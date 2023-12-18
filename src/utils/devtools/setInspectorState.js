@@ -2,7 +2,7 @@ import highlighterSingleton from './highlighter'
 import tryHighlightComponent from './tryHighlightComponent'
 import getApplicableFixes from './getApplicableFixes'
 
-export default async function setInspectorState(payload, api, violators, violations, componentInstances, relevantComponentInstances) {
+export default async function setInspectorState(payload, api, violators, violations, componentInstances) {
     highlighterSingleton.clear()
     
     if (typeof payload.nodeId === 'string') {
@@ -17,7 +17,7 @@ export default async function setInspectorState(payload, api, violators, violati
             const violation = violations.find(v => v.id === vId)
 
             if (!violation) {
-                console.error('no matching violation found', {nodeId, 'payload.nodeId': payload.nodeId, violators, violations, relevantComponentInstances, componentInstances})
+                console.error('no matching violation found', {nodeId, 'payload.nodeId': payload.nodeId, violators, violations, componentInstances})
                 return
             }
 

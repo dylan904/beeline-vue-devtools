@@ -6,9 +6,9 @@ import generatePayloadFromViolation from './generatePayloadFromViolation'
 let lastViolations
 let lastRootNodes
 
-export default async function setInspectorTree(payload, api, violatorsRef, violations, componentInstances) {
-    if (!violations) {
-        console.error('No violations...')
+export default async function setInspectorTree(payload, api, violatorsRef, violations, relevantComponentInstances) {
+    if (!violations || !relevantComponentInstances) {
+        console.error('Missing context...', violations, relevantComponentInstances)
         return
     } else if (violations === lastViolations) {
         payload.rootNodes = lastRootNodes
@@ -28,7 +28,7 @@ export default async function setInspectorTree(payload, api, violatorsRef, viola
     }
 
     const vTally = new ViolationTally()
-    await vTally.init(componentInstances, violations, api)
+    await vTally.init(relevantComponentInstances, violations, api)
     labelOtherImpacts(violatorNodes, 'component', vTally)
 
     for (const violatorNode of violatorNodes) {
@@ -46,7 +46,7 @@ export default async function setInspectorTree(payload, api, violatorsRef, viola
         }
         labelOtherImpacts(instances, 'instance', vTally)
     }
-    
+
     payload.rootNodes = sortViolators(violatorNodes)
     lastRootNodes = payload.rootNodes
 }

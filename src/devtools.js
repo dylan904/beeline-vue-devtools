@@ -59,13 +59,13 @@ export const DevtoolsPlugin = {
 
             api.on.getInspectorTree(async payload => {
                 if (payload.inspectorId === inspectorId && init) {
-                    await setInspectorTree(payload, api, violatorsRef, violationsRef.value, componentInstances)
+                    await setInspectorTree(payload, api, violatorsRef, violationsRef.value, relevantComponentInstances)
                 }
             })
 
             api.on.getInspectorState(async payload => {
                 if (payload.inspectorId === inspectorId) {
-                    await setInspectorState(payload, api, violatorsRef.value, violationsRef.value, componentInstances, relevantComponentInstances)
+                    await setInspectorState(payload, api, violatorsRef.value, violationsRef.value, componentInstances)
                 }
             })
 
