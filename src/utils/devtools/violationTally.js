@@ -37,7 +37,8 @@ export default class ViolationTally {
 
             for (const violation of this.#violations) {
                 const violationMatches = violation.nodes.filter(n => n.componentInstanceId === iid)
-                this.#incrementIfMatched(violation, violationMatches.length, matchingVs)
+                if (violationMatches.length)
+                    this.#increment(violation, violationMatches.length, matchingVs)
             }
             instanceViolations[iid] = matchingVs
         }
@@ -49,16 +50,14 @@ export default class ViolationTally {
         return await this.#api.getComponentName(instance)
     }
 
-    #incrementIfMatched(violation, matchCount, matchingVs) {
-        if (matchCount) {
-            if (!matchingVs.violations.hasOwnProperty(violation.id)) {
-                matchingVs.violations[violation.id] = {
-                    count: 0, impact: violation.impact
-                }
+    #increment(violation, matchCount, matchingVs) {
+        if (!matchingVs.violations.hasOwnProperty(violation.id)) {
+            matchingVs.violations[violation.id] = {
+                count: 0, impact: violation.impact
             }
-            matchingVs.violations[violation.id].count += matchCount
-            matchingVs.totals[violation.impact] += matchCount
         }
+        matchingVs.violations[violation.id].count += matchCount
+        matchingVs.totals[violation.impact] += matchCount
     }
 
     async #getAllComponentViolations() {
@@ -74,8 +73,8 @@ export default class ViolationTally {
             for (const violation of this.#violations) {
                 for (const node of violation.nodes) {
                     const nodeComponentName = await this.getComponentNameById(node.componentInstanceId)
-                    const matchCount = nodeComponentName === componentName ? 1 : 0
-                    this.#incrementIfMatched(violation, matchCount, matchingVs);
+                    if (nodeComponentName === componentName)
+                        this.#increment(violation, 1, matchingVs)
                 }
             }
             componentViolations[componentName] = matchingVs
