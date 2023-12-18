@@ -18,6 +18,5 @@ function getSortScore(item) {
 function getViolationSortScore (accumulator, item) {
     const impact = item.tags.find(t => t.impact).impact
     const occurences = item.occurences
-    console.log('sortthescore', violationSortScoreScale[impact], accumulator, impact, item)
     return accumulator + (violationSortScoreScale[impact] * occurences)
 }
