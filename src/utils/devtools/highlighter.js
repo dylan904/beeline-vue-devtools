@@ -31,10 +31,10 @@ class HighlighterSingleton {
     }
 
     clear() {
-        for (const [hi, highlighter] of this.#highlighers.entries()) {
+        for (const highlighter of this.#highlighers) {
             highlighter.remove()
-            array.splice(hi, 1)
         }
+        this.#highlighers = []
     }
 
     #getComponentElement(componentInstanceId, allEls = [...document.querySelectorAll('body *')]) {
