@@ -80,3 +80,7 @@ Obtain your Cosmos DB connection string [here](https://portal.azure.com/#@beelin
 # Usage
 
 	npm run test:audit
+
+### Switch to the "Accessibility Inspector" tab
+
+ ![test](https://github.com/dylan904/beeline-vue-devtools/blob/main/screenshots/devtools-plugin-tab.png?raw=true)
