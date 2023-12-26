@@ -1,7 +1,7 @@
 import { ref, watch } from 'vue'
 import devtools from '@vue/devtools'
 import { setupDevtoolsPlugin } from '@vue/devtools-api'
-import auditA11Y from './utils/audit'
+import auditA11Y from './utils/audit/index.js'
 import getInspectorActions from './utils/devtools/getInspectorActions'
 import getInspectorNodeActions from './utils/devtools/getInspectorNodeActions'
 import createAxeScript from './utils/audit/createAxeScript'

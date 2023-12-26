@@ -1,4 +1,4 @@
-import cosmos from './utils/audit/cosmos' // singleton
+import cosmos from './utils/audit/cosmos/index.js' // singleton
 import git from './utils/versioning/git'  // singleton
 import getCosmosViolationOps from './utils/versioning/getCosmosViolationOps'
 import updateTrackingRepo from './utils/versioning/updateTrackingRepo'

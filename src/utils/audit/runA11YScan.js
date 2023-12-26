@@ -1,6 +1,6 @@
 import cooler from './cooler'
 import serialize from './serialize'
-import cosmosSingleton from './cosmos'
+import cosmosSingleton from './cosmos/index.js'
 import appendViolations from './appendViolations'
 
 export default async function scan(router, violations, firstRun) {
