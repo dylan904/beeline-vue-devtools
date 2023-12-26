@@ -1,32 +1,50 @@
 import filterModifiedComponents from "./filterModifiedComponents"
+import partition from "lodash/partition"
+import copy from "../copy"
+import vOps from "../versioning/violationOps"
 
-export default function appendViolations(targetViolations, srcViolations, id) {
+export default function appendViolations(targetViolations, srcViolations, id, modified=false) {
   let altered = false
   const ops = []
+
   for (const [vi, newV] of srcViolations.entries()) {
-    const targetViolation = targetViolations.find(v => v.id === newV.id)
+    const vCopy = copy(newV)
+    const targetViolation = targetViolations.find(v => v.id === vCopy.id)
+
     if (targetViolation) {
-      const newNodes = newV.nodes.filter(nv => !targetViolation.nodes.find(ov => ov.target[0] === nv.target[0]))
+      const newNodes = vCopy.nodes.filter(nv => !targetViolation.nodes.find(ov => ov.target[0] === nv.target[0]))
+
       if (newNodes.length) {
         altered = true
         targetViolation.nodes.push(...newNodes)
+
         if (id) {
-          newNodes.filter(filterModifiedComponents).forEach(newNode => {
-            ops.push({ "op": "add", "path": `/violations/${vi}/nodes/-`, "value": newNode })
-          })
+          const [unModifiedCompNodes, modifiedCompNodes] = partition(newNodes, filterModifiedComponents)
+          const newNodes = modified ? modifiedCompNodes.filter(filterOutRoot) : unModifiedCompNodes
+
+          for (const newNode of newNodes) {
+            ops.push(vOps.addNode(vi, newNode))
+          }
         }
       }
     }
     else {
       altered = true
-      targetViolations.push(newV)
+      targetViolations.push(vCopy)
+
       if (id) {
-        newV.nodes = newV.nodes.filter(filterModifiedComponents)
-        if (newV.nodes.length) {
-          ops.push({ "op": "add", "path": `/violations/-`, "value": newV })
+        const [unModifiedCompNodes, modifiedCompNodes] = partition(vCopy.nodes, filterModifiedComponents)
+        vCopy.nodes = modified ? modifiedCompNodes.filter(filterOutRoot) : unModifiedCompNodes
+        
+        if (vCopy.nodes.length) {
+          ops.push(vOps.addViolation(vCopy))
         }
       }
     }
   }
   return { altered, ops }
+}
+
+function filterOutRoot(node) {
+  return node.component?.name !== 'ROOT'
 }
