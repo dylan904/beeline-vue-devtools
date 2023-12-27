@@ -12,7 +12,8 @@
   "dependencies": {
     "@vue/devtools": "^6.5.1",
     "uuid": "^9.0.1",
-    "@azure/cosmos": "^4.0.0"
+    "@azure/cosmos": "^4.0.0",
+    "cross-env": "^7.0.3"
   },
   "devDependencies": {
     
