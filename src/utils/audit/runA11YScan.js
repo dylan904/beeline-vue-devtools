@@ -1,7 +1,7 @@
-import cooler from './cooler'
-import serialize from './serialize'
+import cooler from './cooler.js'
+import serialize from './serialize.js'
 import cosmosSingleton from './cosmos/index.js'
-import appendViolations from './appendViolations'
+import appendViolations from './appendViolations.js'
 
 export default async function scan(router, violations, firstRun) {
     const currentRoute = router?.currentRoute.value

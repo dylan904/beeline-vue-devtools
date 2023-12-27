@@ -2,11 +2,11 @@ import { ref, watch } from 'vue'
 import devtools from '@vue/devtools'
 import { setupDevtoolsPlugin } from '@vue/devtools-api'
 import auditA11Y from './utils/audit/index.js'
-import getInspectorActions from './utils/devtools/getInspectorActions'
-import getInspectorNodeActions from './utils/devtools/getInspectorNodeActions'
-import createAxeScript from './utils/audit/createAxeScript'
-import setInspectorState from './utils/devtools/setInspectorState'
-import setInspectorTree from './utils/devtools/setInspectorTree'
+import getInspectorActions from './utils/devtools/getInspectorActions.js'
+import getInspectorNodeActions from './utils/devtools/getInspectorNodeActions.js'
+import createAxeScript from './utils/audit/createAxeScript.js'
+import setInspectorState from './utils/devtools/setInspectorState.js'
+import setInspectorTree from './utils/devtools/setInspectorTree.js'
 
 if (import.meta.hot) {
     import.meta.hot.on('revisions-update', revisions => {

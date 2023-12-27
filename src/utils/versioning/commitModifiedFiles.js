@@ -1,4 +1,4 @@
-import git from "./git"
+import git from "./git.js"
 
 export default async function commitModifiedFiles(filePaths) {
   const newCommitFiles = []

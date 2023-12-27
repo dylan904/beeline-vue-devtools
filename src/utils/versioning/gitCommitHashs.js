@@ -1,4 +1,4 @@
-import git from "./git"  // singleton
+import git from "./git.js"  // singleton
 
 export default async function gitCommitHashs(filePaths) {
   for (const filePath of filePaths) {

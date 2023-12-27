@@ -1,6 +1,6 @@
-import getClosestComponentInstance from './getClosestComponentInstance'
-import tallyInstanceOccurence from './tallyInstanceOccurance'
-import { impactTextMap, impactBGMap } from './colorMaps'
+import getClosestComponentInstance from './getClosestComponentInstance.js'
+import tallyInstanceOccurence from './tallyInstanceOccurance.js'
+import { impactTextMap, impactBGMap } from './colorMaps.js'
 
 export default async function generatePayloadFromViolation(violation, node, violatorNodes, api) {
     const closestComponentInstance = getClosestComponentInstance(node.target[0])
