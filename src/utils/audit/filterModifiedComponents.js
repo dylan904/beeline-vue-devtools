@@ -2,9 +2,9 @@ import getClosestComponentInstance from '../devtools/getClosestComponentInstance
 import git from '../versioning/git.js'
 
 const srcPathRegex = /.*\/src\//
-const authorEmail = await git.getUserEmail()
+let authorEmail
 
-export default function filterModifiedComponents(newNode) {
+export default async function filterModifiedComponents(newNode) {
   let match = true
   const componentInstance = getClosestComponentInstance(newNode.target[0])
   const componentInfo = {
@@ -20,6 +20,8 @@ export default function filterModifiedComponents(newNode) {
       componentInfo.commitHash = process.env.revisions[componentFile]
       match = false
     }
+    if (!authorEmail)
+      authorEmail = await git.getUserEmail()
     componentInfo.file = `authors/${authorEmail}/${componentFile}`
   }
 
