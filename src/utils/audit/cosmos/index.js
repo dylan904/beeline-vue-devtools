@@ -18,7 +18,7 @@ class CosmosSingleton {
       }
 
       const client = new CosmosClient(a11YCosmosConnectionString);
-      console.log('test', {cosmosString: a11YCosmosConnectionString, project: process.env.project, version: process.env.version})
+      console.log('test', {cosmosString: a11YCosmosConnectionString, project: process.env.project, version: process.env.version}, import.meta.env)
       const { database } = await client.databases.createIfNotExists({ id: process.env.project })
       this.database = database
       
