@@ -1,7 +1,7 @@
-import filterModifiedComponents from "./filterModifiedComponents"
+import filterModifiedComponents from "./filterModifiedComponents.js"
 import partition from "lodash/partition"
-import copy from "../copy"
-import vOps from "../versioning/violationOps"
+import copy from "../copy.js"
+import vOps from "../versioning/violationOps.js"
 
 export default function appendViolations(targetViolations, srcViolations, id, modified=false) {
   let altered = false

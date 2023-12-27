@@ -1,6 +1,6 @@
-import git from './git'           // singleton
-import vOps from './violationOps' // singleton
-import shiftViolation from './shiftViolation'
+import git from './git.js'           // singleton
+import vOps from './violationOps.js' // singleton
+import shiftViolation from './shiftViolation.js'
 
 export default async function getCosmosViolationOps(srcViolations, violations, isPending) {
   // isPending - is evaluating pending violation files from DB, otherwise evaluating current violations

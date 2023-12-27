@@ -1,5 +1,5 @@
-import getClosestComponentInstance from '../devtools/getClosestComponentInstance'
-import git from '../versioning/git'
+import getClosestComponentInstance from '../devtools/getClosestComponentInstance.js'
+import git from '../versioning/git.js'
 
 const srcPathRegex = /.*\/src\//
 const authorEmail = await git.getUserEmail()

@@ -1,4 +1,4 @@
-import git from "./git"
+import git from "./git.js"
 
 export default async function getModifiedHash(filePath, exec) {
     const { stdout: savedChanges} = await git.fileHasChanges(filePath)

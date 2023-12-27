@@ -1,4 +1,4 @@
-import appendViolations from './appendViolations'
+import appendViolations from './appendViolations.js'
 
 export default async function updateNewViolations(cosmosSingleton, violations, urlKey, modified=false) {
     const qResult = await cosmosSingleton.queryViolations(urlKey, modified)[0]

@@ -1,6 +1,6 @@
-import gitCommitHashs from './gitCommitHashs'
-import getComponentFiles from './getComponentFiles'
-import commitModifiedFiles from './commitModifiedFiles'
+import gitCommitHashs from './gitCommitHashs.js'
+import getComponentFiles from './getComponentFiles.js'
+import commitModifiedFiles from './commitModifiedFiles.js'
 import { promisify } from 'util'
 import { exec } from 'child_process'
 

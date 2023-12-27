@@ -1,4 +1,4 @@
-import vOps from './violationOps'   // singleton
+import vOps from './violationOps.js'   // singleton
 
 export default function shiftViolation(srcViolations, destViolations, destOps, srcOps, vIdx, nIdx) {
   const violation = srcViolations[vIdx]

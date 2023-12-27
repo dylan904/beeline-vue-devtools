@@ -1,4 +1,4 @@
-import { impactTextMap, impactBGMap } from './colorMaps'
+import { impactTextMap, impactBGMap } from './colorMaps.js'
 
 export default async function labelOtherImpacts(impactArray, type, vTally) {
     for (const impactItem of impactArray) {

@@ -1,4 +1,4 @@
-import serialize from './serialize'
+import serialize from './serialize.js'
 
 export default function getUrlKey(router) {
     const currentRoute = router?.currentRoute.value

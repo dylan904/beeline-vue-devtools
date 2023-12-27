@@ -1,7 +1,7 @@
 import cosmos from './utils/audit/cosmos/index.js' // singleton
-import git from './utils/versioning/git'  // singleton
-import getCosmosViolationOps from './utils/versioning/getCosmosViolationOps'
-import updateTrackingRepo from './utils/versioning/updateTrackingRepo'
+import git from './utils/versioning/git.js'  // singleton
+import getCosmosViolationOps from './utils/versioning/getCosmosViolationOps.js'
+import updateTrackingRepo from './utils/versioning/updateTrackingRepo.js'
 
 const a11yBranch = 'a11y-file-tracking'
 
