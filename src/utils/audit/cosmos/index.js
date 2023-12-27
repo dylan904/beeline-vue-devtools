@@ -1,6 +1,7 @@
-import { CosmosClient } from "@azure/cosmos"
-import queryViolations from "./queryViolations";
-import updateViolations from "./updateViolations";
+import { CosmosClient } from '@azure/cosmos'
+import queryViolations from './queryViolations'
+import updateViolations from './updateViolations'
+import 'dotenv/config'
 
 const a11YCosmosConnectionString = import.meta.env ? import.meta.env.VITE_A11Y_COSMOS_CONNECTION_STRING : process.env.VITE_A11Y_COSMOS_CONNECTION_STRING
 
