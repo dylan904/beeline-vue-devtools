@@ -1,4 +1,4 @@
-import { CosmosClient } from "@azure/cosmos/index.js"
+import { CosmosClient } from "@azure/cosmos"
 import queryViolations from "./queryViolations.js";
 import updateViolations from "./updateViolations.js";
 
