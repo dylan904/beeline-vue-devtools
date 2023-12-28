@@ -17,20 +17,20 @@ class CosmosSingleton {
         throw new Error('No Cosmos DB connection string provided in env variable: VITE_A11Y_COSMOS_CONNECTION_STRING')
       }
 
-      const package = {
+      const thePackage = {
         name: packageName || process.env.project,
         version: packageVersion || process.env.version
       }
 
       const client = new CosmosClient(a11YCosmosConnectionString);
-      console.log('test', {cosmosString: a11YCosmosConnectionString, project: package.name, version: package.version}, import.meta.env)
-      const { database } = await client.databases.createIfNotExists({ id: package.name })
+      console.log('test', {cosmosString: a11YCosmosConnectionString, project: thePackage.name, version: thePackage.version}, import.meta.env)
+      const { database } = await client.databases.createIfNotExists({ id: thePackage.name })
       this.database = database
       
-      const { container } = await this.database.containers.createIfNotExists({ id: package.version })
+      const { container } = await this.database.containers.createIfNotExists({ id: thePackage.version })
       this.container = container
       
-      const { container: modifiedContainer } = await this.database.containers.createIfNotExists({ id: `${package.version} (pending)` })
+      const { container: modifiedContainer } = await this.database.containers.createIfNotExists({ id: `${thePackage.version} (pending)` })
       this.modifiedContainer = modifiedContainer
     }
   }
