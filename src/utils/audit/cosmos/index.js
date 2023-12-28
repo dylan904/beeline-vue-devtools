@@ -1,7 +1,6 @@
 import { CosmosClient } from '@azure/cosmos'
 import queryViolations from './queryViolations.js'
 import updateViolations from './updateViolations.js'
-import 'dotenv/config'
 
 const a11YCosmosConnectionString = import.meta.env ? import.meta.env.VITE_A11Y_COSMOS_CONNECTION_STRING : process.env.VITE_A11Y_COSMOS_CONNECTION_STRING
 
@@ -23,7 +22,7 @@ class CosmosSingleton {
       }
 
       const client = new CosmosClient(a11YCosmosConnectionString);
-      console.log('test', {cosmosString: a11YCosmosConnectionString, project: thePackage.name, version: thePackage.version}, import.meta.env)
+      console.log('testmepls', {cosmosString: a11YCosmosConnectionString, thePackage}, import.meta.env, process.env)
       const { database } = await client.databases.createIfNotExists({ id: thePackage.name })
       this.database = database
       
