@@ -7,7 +7,8 @@ const a11yBranch = 'a11y-file-tracking'
 
 export async function getRevisions(packageName, packageVersion) {
   try {
-    await cosmos.init(packageName, packageVersion)
+    if (!cosmos.getContainer())
+      await cosmos.init(packageName, packageVersion)
   } catch(err) {
     console.warn('Cant get revisions: ' + err)
     return {}
