@@ -5,9 +5,9 @@ import updateTrackingRepo from './utils/versioning/updateTrackingRepo.js'
 
 const a11yBranch = 'a11y-file-tracking'
 
-export async function getRevisions() {
+export async function getRevisions(packageName, packageVersion) {
   try {
-    await cosmos.init()
+    await cosmos.init(packageName, packageVersion)
   } catch(err) {
     console.warn('Cant get revisions: ' + err)
     return {}
