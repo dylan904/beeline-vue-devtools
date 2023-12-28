@@ -38,6 +38,7 @@ export async function getRevisions(packageName, packageVersion) {
     }
     console.log({syncedPageViolationSet})
     console.log({pendingOps, currentOps})
+    console.log({currentBranch})
 
     git.checkoutBranch(currentBranch)    // return to previous branch
 
