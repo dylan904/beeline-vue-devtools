@@ -1,5 +1,5 @@
-import { BridgeEvents } from '../consts'
-import { useBridge } from '../../features/bridge'
+import { BridgeEvents } from '../consts.js'
+import { useBridge } from '../../features/bridge.js'
 
 export default function getInspectorNodeActions(inspectorId, componentInstances) {
     return [

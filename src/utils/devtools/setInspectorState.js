@@ -1,6 +1,6 @@
-import highlighterSingleton from './highlighter'
-import tryHighlightComponent from './tryHighlightComponent'
-import getApplicableFixes from './getApplicableFixes'
+import highlighterSingleton from './highlighter.js'
+import tryHighlightComponent from './tryHighlightComponent.js'
+import getApplicableFixes from './getApplicableFixes.js'
 
 export default async function setInspectorState(payload, api, violators, violations, componentInstances) {
     highlighterSingleton.clear()

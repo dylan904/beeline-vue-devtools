@@ -1,6 +1,6 @@
 import { onUnmounted } from 'vue'
-import { BridgeEvents } from '../utils/consts'
-import { Bridge } from '../utils/bridge'
+import { BridgeEvents } from '../utils/consts.js'
+import { Bridge } from '../utils/bridge.js'
 
 let bridge: Bridge
 

@@ -1,23 +1,30 @@
-import getClosestComponentInstance from '../devtools/getClosestComponentInstance'
+import getClosestComponentInstance from '../devtools/getClosestComponentInstance.js'
+import git from '../versioning/git.js'
 
-const filePathRegex = /.*\/src\//
+const srcPathRegex = /.*\/src\//
+let authorEmail
 
-export default function filterModifiedComponents(newNode) {
-    const componentInstance = getClosestComponentInstance(newNode.target[0])
-    const componentInfo = {
-      name: componentInstance.type.name || componentInstance.type.__name
-    }
-    
-    if (componentInstance.type.__file) {
-      const componentFile = componentInstance.type.__file.replace(filePathRegex, 'src/')
-      if (process.env.revisions[componentFile]) // if file revised skip. TODO: store for later and check if in PR
-        return false
-      componentInfo.file = componentFile
-    }
-    componentInfo.props = componentInstance.props
-    componentInfo.data = componentInstance.data
-    componentInfo.setupState = componentInstance.setupState
-    newNode.component = componentInfo
+export default async function filterModifiedComponents(newNode) {
+  let match = true
+  const componentInstance = getClosestComponentInstance(newNode.target[0])
+  const componentInfo = {
+    name: componentInstance.type.name || componentInstance.type.__name,
+    props: componentInstance.props,
+    data: componentInstance.data,
+    setupState: componentInstance.setupState
+  }
   
-    return true
+  if (componentInstance.type.__file) {
+    const componentFile = componentInstance.type.__file.replace(srcPathRegex, 'src/')
+    if (process.env.revisions[componentFile]) { // if file revised, store for later and check if pushed in recent commit
+      componentInfo.commitHash = process.env.revisions[componentFile]
+      match = false
+    }
+    if (!authorEmail)
+      authorEmail = await git.getUserEmail()
+    componentInfo.file = `authors/${authorEmail}/${componentFile}`
+  }
+
+  newNode.component = componentInfo
+  return match
 }

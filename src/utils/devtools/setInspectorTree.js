@@ -1,7 +1,7 @@
-import labelOtherImpacts from './labelOtherImpacts'
-import ViolationTally from './violationTally'
-import sortViolators from './sortViolators'
-import generatePayloadFromViolation from './generatePayloadFromViolation'
+import labelOtherImpacts from './labelOtherImpacts.js'
+import ViolationTally from './violationTally.js'
+import sortViolators from './sortViolators.js'
+import generatePayloadFromViolation from './generatePayloadFromViolation.js'
 
 let lastViolations
 let lastRootNodes
