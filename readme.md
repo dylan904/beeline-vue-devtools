@@ -32,7 +32,7 @@ if (import.meta.env.DEV && process.env.AUDITA11Y) {
 
 From your package.json, add one script:
 
-	"test:audit": "./node_modules/.bin/vue-devtools & AUDITA11Y=1 npm run dev"
+	"test:audit": "node_modules/.bin/vue-devtools & node_modules/cross-env/src/bin/cross-env.js AUDITA11Y=1 npm run dev"
 
  ## vite.config
 
@@ -42,7 +42,7 @@ Inside your vite config file, import these lines:
 
 ```js
 import packageJSON from './package.json' assert {type: 'json'}
-import { getRevisions, revisionWatcherVitePlugin } from 'beeline-vue-devtools/src/versioning.js'
+import { getA11yConfig, revisionWatcherVitePlugin } from 'beeline-vue-devtools/src/versioning.js'
 ```
 
 Then, wrap defineConfig with an async function:
@@ -56,10 +56,7 @@ export default async () => {
 Within defineConfig add:
 ```js
 define: {
-    'process.env.project': '"' + packageJSON.name + '"',
-    'process.env.version': '"' + packageJSON.version + '"',
-    'process.env.revisions': await getRevisions(),
-    'process.env.AUDITA11Y': process.env.AUDITA11Y
+    ...(await getA11yConfig(import.meta.url))
 },
 ```
 
