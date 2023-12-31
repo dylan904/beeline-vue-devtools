@@ -1,8 +1,6 @@
 import getClosestComponentInstance from '../devtools/getClosestComponentInstance.js'
-import git from '../versioning/git.js'
 
 const srcPathRegex = /.*\/src\//
-let authorEmail
 
 export default async function filterModifiedComponents(newNode) {
   let match = true
@@ -18,11 +16,11 @@ export default async function filterModifiedComponents(newNode) {
     const componentFile = componentInstance.type.__file.replace(srcPathRegex, 'src/')
     if (process.env.revisions[componentFile]) { // if file revised, store for later and check if pushed in recent commit
       componentInfo.commitHash = process.env.revisions[componentFile]
+      componentInfo.file = `authors/${process.env.author}/${componentFile}`
       match = false
     }
-    if (!authorEmail)
-      authorEmail = await git.getUserEmail()
-    componentInfo.file = `authors/${authorEmail}/${componentFile}`
+    else
+      componentFile.file = componentFile
   }
 
   newNode.component = componentInfo
