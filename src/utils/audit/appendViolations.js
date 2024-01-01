@@ -22,6 +22,8 @@ export default function appendViolations(targetViolations, srcViolations, id, mo
           const [unModifiedCompNodes, modifiedCompNodes] = partition(newNodes, filterModifiedComponents)
           const newNodes = modified ? modifiedCompNodes.filter(filterOutRoot) : unModifiedCompNodes
 
+          console.log({id, newNodes})
+
           for (const newNode of newNodes) {
             ops.push(vOps.addNode(vi, newNode))
           }
@@ -35,6 +37,8 @@ export default function appendViolations(targetViolations, srcViolations, id, mo
       if (id) {
         const [unModifiedCompNodes, modifiedCompNodes] = partition(vCopy.nodes, filterModifiedComponents)
         vCopy.nodes = modified ? modifiedCompNodes.filter(filterOutRoot) : unModifiedCompNodes
+
+        console.log({id, nodes: vCopy.nodes})
         
         if (vCopy.nodes.length) {
           ops.push(vOps.addViolation(vCopy))

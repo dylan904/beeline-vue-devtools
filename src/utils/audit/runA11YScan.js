@@ -26,14 +26,13 @@ export default async function scan(router, violations, firstRun) {
         return result
       }
     }
-    
       
     if (import.meta.env.VITE_A11Y_COSMOS_CONNECTION_STRING) {
       const qResult = await cosmos.queryViolations(urlKey)
       const recordedViolations = qResult.violations || []
       console.log('testdbd2', process.env.version, urlKey, recordedViolations, qResult)
       const recordedViolationCount = recordedViolations.length
-      console.log({recordedViolationCount})
+      console.log({recordedViolationCount, id: qResult.id})
       const { altered, ops } = appendViolations(recordedViolations, violations, qResult.id)
   console.log({altered, ops})
       if (recordedViolationCount) {
