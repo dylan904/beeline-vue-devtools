@@ -1,16 +1,16 @@
 import appendViolations from './appendViolations.js'
 
-export default async function updateNewViolations(cosmosSingleton, violations, urlKey, modified=false) {
-    const qResult = await cosmosSingleton.queryViolations(urlKey, modified)[0]
+export default async function updateNewViolations(cosmos, violations, urlKey, modified=false) {
+    const qResult = await cosmos.queryViolations(urlKey, modified)[0]
     const recordedViolations = qResult.violations || []
     const { altered, ops } = appendViolations(recordedViolations, violations, qResult.id, modified)
 
     if (recordedViolations.length) {
         if (altered) 
-            cosmosSingleton.updateViolations(qResult.id, ops, modified)
+            cosmos.updateViolations(qResult.id, ops, modified)
     }
     else {
-        const { container, modifiedContainer } = cosmosSingleton.getContainers()
+        const { container, modifiedContainer } = cosmos.getContainers()
         const dbContainer = modified ? modifiedContainer : container
         const item = dbContainer.item(qResult.id)
         const { resource } = await item.patch([{ 
