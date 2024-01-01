@@ -2,9 +2,27 @@ import { promisify } from 'util'
 import { exec } from 'child_process'
 
 class Git {
-    async addFile(filePath) {
-        const { stderr } = await this.exec(`git add ${filePath}`)
-        return { error: stderr }
+    async init() {  // optional
+        if (!(await this.isRepo())) {
+            throw('Not a git repository (yet). Try running "git init"')
+        }
+        else if (!(await this.hasCommits())) {
+            await this.exec('git commit --allow-empty -n -m "Initial commit."')
+        }
+    }
+
+    async isRepo() {
+        const { stdout } = await this.exec(`git rev-parse --is-inside-work-tree`)
+        return stdout.trim() === 'true'
+    }
+
+    async hasCommits() {
+        try {
+            await this.exec(`git log`)
+            return true
+        } catch(error) {
+            return false
+        }
     }
 
     async isFileTracked(filePath) {
@@ -16,6 +34,15 @@ class Git {
         const flags = staged ? '--staged' : ''
         const { stdout: changes } = await this.exec(`git diff ${flags} ${filePath}`)
         return !!changes
+    }
+
+    async addFile(filePath) {
+        try {
+            await this.exec(`git add ${filePath}`)
+            return {}
+        } catch(error) {
+            return { error }
+        }
     }
 
     async commitFiles(filePaths, message="File tracking commit", flags=[], ignoreUntracked=false) {
@@ -30,12 +57,11 @@ class Git {
             try {
                 await this.exec(`git commit ${ args.join(' ') }`)
             } catch(commitErr) {
-                console.log('COMMIT ERR: ', commitErr)
                 if (ignoreUntracked) {
                     const { stdout: rawUntackedFiles } = await this.exec('git status --porcelain | grep "^??"')
                     const untackedFiles = rawUntackedFiles.split('??').map(file => file.trim())
                     untackedFiles.shift()
-                    console.log({untackedFiles})
+                    console.log({ untackedFiles })
                 }
             }
             const commitHash = await this.exec(`git rev-parse HEAD`)
@@ -74,24 +100,24 @@ class Git {
     }
 
     async createBranch(branchName) {
-        console.log('createBranch', branchName)
-        const { stderr: createErr } = await this.exec(`git checkout -b ${branchName}`)
-        if (createErr) {
-            throw(createErr)
+        try {
+            await this.exec(`git checkout -b ${branchName}`)
+            return {}
+        } catch(error) {
+            return { error }
         }
     }
 
     async checkoutBranch(branchName) {
-        console.log('checkoutbranch', branchName)
         try {
             await this.exec(`git checkout ${branchName}`)
-        } catch(err) {
-            console.log(err)
+            return {}
+        } catch(error) {
+            return { error }
         }
     }
 
     async forcefullyCheckoutBranch(branchName) {
-        console.log('forcefullyCheckoutBranch', branchName, await this.branchExists(branchName))
         const currentBranch = await this.getCurrentBranch() // hold current branch name
   
         if (!(await this.branchExists(branchName)))
@@ -103,9 +129,10 @@ class Git {
     }
 
     async checkoutFileFromBranch(filePath, branchName) {
-        const { stderr: createErr } = await this.exec(`git checkout ${branchName} -- ${filePath}`)
-        if (createErr) {
-            throw(createErr)
+        try {
+            await this.exec(`git checkout ${branchName} -- ${filePath}`)
+        } catch(error) {
+            return { error }
         }
     }
 

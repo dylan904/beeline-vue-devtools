@@ -9,6 +9,7 @@ import getCosmosViolationOps from './utils/versioning/getCosmosViolationOps.js'
 import updateTrackingRepo from './utils/versioning/updateTrackingRepo.js'
 
 const a11yBranch = 'a11y-file-tracking'
+console.log('hii2')
 
 export async function getPackageJSON(importURL) {
   try {
@@ -27,7 +28,16 @@ export async function getPackageJSON(importURL) {
 }
 
 export async function getA11yConfig(importURL) {
-  //console.log('checkenv', process.env.NODE_ENV)
+
+  console.log('testrepo2', (await git.hasCommits()), dirname(fileURLToPath(importURL)), await git.isRepo())
+  
+  try {
+    await git.init()
+  } catch(err) {
+    console.log(err)
+    return {}
+  }
+
   process.env = { ...process.env, ...loadEnv(process.env.NODE_ENV, process.cwd()) }
   
   const packageJSON = await getPackageJSON(importURL)
@@ -40,13 +50,10 @@ export async function getA11yConfig(importURL) {
     'process.env.VITE_A11Y_COSMOS_CONNECTION_STRING': '"' + process.env.VITE_A11Y_COSMOS_CONNECTION_STRING + '"'
   }
 
-  console.log({newProcessProps})
-
   for (const propKey in newProcessProps) {
     const value = newProcessProps[propKey]
     process.env[propKey.replace('process.env.', '')] = value.substring(1, value.length-1)
   }
-  process.env.testing = true
 
   // set revisions after so it can access cosmos string
   const revisions = await getRevisions(packageJSON.name, packageJSON.version)
