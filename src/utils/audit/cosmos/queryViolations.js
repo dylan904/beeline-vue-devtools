@@ -21,7 +21,7 @@ export default async function queryViolations(urlKey, modified=false) {
       id: item.id, 
       violations: item.violations, 
       urlKey: item.urlKey
-    }))[0]
+    }))
   }
   else if (urlKey) {  // page doesn't exist
     const id = uuidv4()
