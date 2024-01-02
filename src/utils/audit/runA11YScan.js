@@ -2,7 +2,6 @@ import cooler from './cooler.js'
 import serialize from './serialize.js'
 import cosmos from './cosmos/index.js'
 import appendViolations from './appendViolations.js'
-console.log('hi4')
 
 export default async function scan(router, violations, firstRun) {
   const currentRoute = router?.currentRoute.value
@@ -15,7 +14,6 @@ export default async function scan(router, violations, firstRun) {
 
   if (!result.violations.length)
     return
-    console.log('hii5')
   const { altered } = appendViolations(violations, result.violations)
   if (altered) {
     if (!cosmos.getContainer()) {
@@ -40,25 +38,31 @@ export default async function scan(router, violations, firstRun) {
         pending: qResult.pending.violations || []
       }
 
-      console.log('testdbd2', process.env.version, urlKey, recordedViolations.current, qResult.current)
-      const recordedViolationCount = recordedViolations.current.length
-      console.log({recordedViolationCount, id: qResult.current.id})
+      const currentRecordedViolationCt = recordedViolations.current.length
+      const pendingRecordedViolationCt = recordedViolations.pending.length
+      console.log({currentRecordedViolationCt, pendingRecordedViolationCt, idc: qResult.current.id, idp: qResult.pending.id})
       const { altered, ops } = appendViolations(recordedViolations.current, violations, recordedViolations.pending)
-  console.log({altered, ops})
-      if (recordedViolationCount) {
+      console.log({altered, ops})
+      if (currentRecordedViolationCt) {
         if (ops.current.length) 
           cosmos.updateViolations(qResult.current.id, ops.current, false)
+      }
+      else {
+        cosmos.updateViolations(qResult.current.id, [{ 
+          "op": "set", 
+          "path": "/violations", 
+          "value": recordedViolations.current
+        }])
+      }
+      if (pendingRecordedViolationCt) {
         if (ops.pending.length) 
           cosmos.updateViolations(qResult.pending.id, ops.pending, true)
       }
       else {
-        const container = cosmos.getContainer()
-        const item = container.item(qResult.current.id)
-        console.log('create new violations set', violations)
-        const { resource } = await item.patch([{ 
+        cosmos.updateViolations(qResult.current.id, [{ 
           "op": "set", 
           "path": "/violations", 
-          "value": violations
+          "value": recordedViolations.pending
         }])
       }
     }
