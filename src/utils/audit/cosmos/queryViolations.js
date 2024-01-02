@@ -5,7 +5,7 @@ export default async function queryViolations(urlKey, modified=false) {
   if (urlKey)
     query += ` WHERE c.urlKey = "${urlKey}"`
 
-    console.log('wtf', this.container.toString().length, this.modifiedContainer.toString.length)
+  console.log('wtf', this.container.toString().length, this.modifiedContainer.toString.length)
 
   const container = this.getContainer(modified)
   console.log({findit: true, modified, containers: this.getContainers()})
@@ -13,7 +13,7 @@ export default async function queryViolations(urlKey, modified=false) {
     .query(query)
     .fetchAll();
 
-  console.log({query, items, cid: container.id, did: container.database.id})
+  console.log({query, items, cid: container.id, did: container.database.id, urlKey})
 
   if (items.length) {
     console.log('got items', items)
