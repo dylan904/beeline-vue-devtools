@@ -28,7 +28,6 @@ export default async function scan(router, violations, firstRun) {
     }
       
     if (import.meta.env.VITE_A11Y_COSMOS_CONNECTION_STRING) {
-      console.log('await query', random)
       const qResult = {
         current: (await cosmos.queryViolations(urlKey, false))[0],
         pending: (await cosmos.queryViolations(urlKey, true))[0]
