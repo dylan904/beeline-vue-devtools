@@ -28,25 +28,31 @@ export default async function scan(router, violations, firstRun) {
     }
       
     if (import.meta.env.VITE_A11Y_COSMOS_CONNECTION_STRING) {
-      const random = Math.floor(Math.random() * (9999 - 1) + 1)
       console.log('await query', random)
-      const r = await cosmos.queryViolations(urlKey, false, random)
-      console.log({r, random})
-      const qResult = r[0]
+      const qResult = {
+        current: (await cosmos.queryViolations(urlKey, false))[0],
+        pending: (await cosmos.queryViolations(urlKey, true))[0]
+      }
+      
+      console.log({'qResult.current': qResult.current, 'qResult.pending': qResult.pending})
 
-      const recordedViolations = qResult.violations || []
-      console.log('testdbd2', process.env.version, urlKey, recordedViolations, qResult)
-      const recordedViolationCount = recordedViolations.length
-      console.log({recordedViolationCount, id: qResult.id})
-      const { altered, ops } = appendViolations(recordedViolations, violations, qResult.id)
+      const recordedViolations = {
+        current: qResult.current.violations || [],
+        pending: qResult.pending.violations || []
+      }
+
+      console.log('testdbd2', process.env.version, urlKey, recordedViolations.current, qResult.current)
+      const recordedViolationCount = recordedViolations.current.length
+      console.log({recordedViolationCount, id: qResult.current.id})
+      const { altered, ops } = appendViolations(recordedViolations.current, violations, recordedViolations.pending)
   console.log({altered, ops})
       if (recordedViolationCount) {
         if (altered) 
-          cosmos.updateViolations(qResult.id, ops)
+          cosmos.updateViolations(qResult.current.id, ops)
       }
       else {
         const container = cosmos.getContainer()
-        const item = container.item(qResult.id)
+        const item = container.item(qResult.current.id)
         console.log('create new violations set', violations)
         const { resource } = await item.patch([{ 
           "op": "set", 
@@ -55,8 +61,6 @@ export default async function scan(router, violations, firstRun) {
         }])
       }
     }
-
-    window.violations = violations  // temporary transparency
 
     if (firstRun) {
       const auditCooler = new cooler(2000, scan)

@@ -3,9 +3,12 @@ import partition from "lodash/partition"
 import copy from "../copy.js"
 import vOps from "../versioning/violationOps.js"
 
-export default function appendViolations(targetViolations, srcViolations, id, modified=false) {
+export default function appendViolations(targetViolations, srcViolations, pendingViolations) {
   let altered = false
-  const ops = []
+  const ops = {
+    current: [],
+    pending: []
+  }
 
   for (const [vi, newV] of srcViolations.entries()) {
     const vCopy = copy(newV)
@@ -18,15 +21,14 @@ export default function appendViolations(targetViolations, srcViolations, id, mo
         altered = true
         targetViolation.nodes.push(...newNodes)
 
-        if (id) {
+        if (pendingViolations) {
           const [unModifiedCompNodes, modifiedCompNodes] = partition(newNodes, filterModifiedComponents)
-          const newFilteredNodes = modified ? modifiedCompNodes.filter(filterOutRoot) : unModifiedCompNodes
+          console.log({modifiedCompNodes, unModifiedCompNodes})
 
-          console.log({id, newFilteredNodes})
-
-          for (const newNode of newFilteredNodes) {
-            ops.push(vOps.addNode(vi, newNode))
+          for (const newNode of unModifiedCompNodes) {
+            ops.current.push(vOps.addNode(vi, newNode))
           }
+          appendPendingViolation(newV, pendingViolations, modifiedCompNodes, ops.pending)
         }
       }
     }
@@ -34,15 +36,16 @@ export default function appendViolations(targetViolations, srcViolations, id, mo
       altered = true
       targetViolations.push(vCopy)
 
-      if (id) {
+      if (pendingViolations) {
         const [unModifiedCompNodes, modifiedCompNodes] = partition(vCopy.nodes, filterModifiedComponents)
-        vCopy.nodes = modified ? modifiedCompNodes.filter(filterOutRoot) : unModifiedCompNodes
 
-        console.log({id, nodes: vCopy.nodes})
-        
-        if (vCopy.nodes.length) {
-          ops.push(vOps.addViolation(vCopy))
+        if (unModifiedCompNodes.length) {
+          const newVCopy = copy(newV)
+          newVCopy.nodes = unModifiedCompNodes
+          ops.current.push(vOps.addViolation(newVCopy))
         }
+
+        appendPendingViolation(newV, pendingViolations, modifiedCompNodes, ops.pending)
       }
     }
   }
@@ -51,4 +54,20 @@ export default function appendViolations(targetViolations, srcViolations, id, mo
 
 function filterOutRoot(node) {
   return node.component?.name !== 'ROOT'
+}
+
+function appendPendingViolation(newV, pendingViolations, modifiedCompNodes, pendingOps) {
+  const newVCopy = copy(newV)
+  const pendingViolation = pendingViolations.find(v => v.id === newVCopy.id)
+  newVCopy.nodes = modifiedCompNodes.filter(filterOutRoot)
+
+  if (pendingViolation) {
+    for (const newNode of modifiedCompNodes.filter(filterOutRoot)) {
+      pendingOps.push(vOps.addNode(vi, newNode))
+    }
+  }
+  else {
+    pendingViolations.push(newVCopy)
+    pendingOps.push(vOps.addViolation(newVCopy))
+  }
 }

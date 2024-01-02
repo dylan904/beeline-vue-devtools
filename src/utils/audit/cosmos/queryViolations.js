@@ -1,11 +1,11 @@
 import { v4 as uuidv4 } from 'uuid'
 
-export default async function queryViolations(urlKey, modified=false, randomTemp='undefined') {
+export default async function queryViolations(urlKey, modified=false) {
   let query = 'SELECT c.id, c.violations, c.urlKey FROM c'
   if (urlKey)
     query += ` WHERE c.urlKey = "${urlKey}"`
 
-  console.log('wtf', this.container.toString().length, this.modifiedContainer.toString.length, randomTemp)
+  console.log('wtf', this.container.toString().length, this.modifiedContainer.toString.length)
 
   const container = this.getContainer(modified)
   console.log({findit: true, modified, containers: this.getContainers()})
@@ -13,7 +13,7 @@ export default async function queryViolations(urlKey, modified=false, randomTemp
     .query(query)
     .fetchAll();
 
-  console.log({query, items, cid: container.id, did: container.database.id, urlKey, randomTemp})
+  console.log({query, items, cid: container.id, did: container.database.id, urlKey})
 
   if (items.length) {
     console.log('got items', items)
