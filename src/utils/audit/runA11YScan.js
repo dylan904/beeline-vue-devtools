@@ -38,12 +38,10 @@ export default async function scan(router, violations, firstRun) {
         pending: qResult.pending.violations || []
       }
 
-      const currentRecordedViolationCt = recordedViolations.current.length
-      const pendingRecordedViolationCt = recordedViolations.pending.length
-      console.log({currentRecordedViolationCt, pendingRecordedViolationCt, idc: qResult.current.id, idp: qResult.pending.id})
+      console.log({currentRecorded: recordedViolations.current, pendingRecorded: recordedViolations.pending, idc: qResult.current.id, idp: qResult.pending.id})
       const { altered, ops } = appendViolations(recordedViolations.current, violations, recordedViolations.pending)
       console.log({altered, ops})
-      if (currentRecordedViolationCt) {
+      if (recordedViolations.current.length) {
         if (ops.current.length) 
           cosmos.updateViolations(qResult.current.id, ops.current, false)
       }
@@ -54,7 +52,7 @@ export default async function scan(router, violations, firstRun) {
           "value": recordedViolations.current
         }])
       }
-      if (pendingRecordedViolationCt) {
+      if (recordedViolations.pending.length) {
         if (ops.pending.length) 
           cosmos.updateViolations(qResult.pending.id, ops.pending, true)
       }
