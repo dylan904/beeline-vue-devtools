@@ -7,6 +7,7 @@ import git from './utils/versioning/git.js'  // singleton
 
 import getCosmosViolationOps from './utils/versioning/getCosmosViolationOps.js'
 import updateTrackingRepo from './utils/versioning/updateTrackingRepo.js'
+import { cpuUsage } from 'process'
 
 const a11yBranch = 'a11y-file-tracking'
 console.log('hii2')
@@ -77,7 +78,7 @@ async function getRevisions(packageName, packageVersion) {
 
   try {
     const revisions = await updateTrackingRepo()
-
+    console.log('try call findAndUpdatePendingOps')
     setTimeout(() => findAndUpdatePendingOps.call(this, currentBranch))
 
     return revisions
@@ -121,6 +122,7 @@ function joinArraysByProp(array1, array1name, array2, array2name, prop=id) {
 }
 
 async function findAndUpdatePendingOps(currentBranch) {
+  console.log('in findAndUpdatePendingOps', currentBranch)
   const currentOps = []
   const pendingOps = []
   
@@ -153,4 +155,5 @@ async function findAndUpdatePendingOps(currentBranch) {
   if (currentOps.length) {
     //await cosmos.updateViolations(qResultCurrent.id, currentOps)
   }
+  console.log('finished findAndUpdatePendingOps')
 }
