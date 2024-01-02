@@ -20,7 +20,7 @@ export default async function filterModifiedComponents(newNode) {
       match = false
     }
     else
-      componentFile.file = componentFile
+      componentInfo.file = componentFile
   }
 
   newNode.component = componentInfo
