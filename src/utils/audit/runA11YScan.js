@@ -46,8 +46,10 @@ export default async function scan(router, violations, firstRun) {
       const { altered, ops } = appendViolations(recordedViolations.current, violations, recordedViolations.pending)
   console.log({altered, ops})
       if (recordedViolationCount) {
-        if (altered) 
-          cosmos.updateViolations(qResult.current.id, ops)
+        if (ops.current.length) 
+          cosmos.updateViolations(qResult.current.id, ops.current)
+        if (ops.pending.length) 
+          cosmos.updateViolations(qResult.pending.id, ops.pending)
       }
       else {
         const container = cosmos.getContainer()
