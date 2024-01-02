@@ -1,11 +1,11 @@
 import { v4 as uuidv4 } from 'uuid'
 
-export default async function queryViolations(urlKey, modified=false, randomTemp) {
+export default async function queryViolations(urlKey, modified=false, randomTemp='undefined') {
   let query = 'SELECT c.id, c.violations, c.urlKey FROM c'
   if (urlKey)
     query += ` WHERE c.urlKey = "${urlKey}"`
 
-  console.log('wtf', this.container.toString().length, this.modifiedContainer.toString.length)
+  console.log('wtf', this.container.toString().length, this.modifiedContainer.toString.length, randomTemp)
 
   const container = this.getContainer(modified)
   console.log({findit: true, modified, containers: this.getContainers()})
