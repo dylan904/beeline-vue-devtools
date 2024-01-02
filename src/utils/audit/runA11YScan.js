@@ -28,8 +28,10 @@ export default async function scan(router, violations, firstRun) {
     }
       
     if (import.meta.env.VITE_A11Y_COSMOS_CONNECTION_STRING) {
+      const random = Math.floor(Math.random() * (9999 - 1) + 1)
+      console.log('await query', random)
       const r = await cosmos.queryViolations(urlKey)[0]
-      console.log({r})
+      console.log({r, random})
       const qResult = r[0]
 
       const recordedViolations = qResult.violations || []
