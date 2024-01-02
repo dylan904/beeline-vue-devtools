@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid'
 
-export default async function queryViolations(urlKey, modified=false) {
+export default async function queryViolations(urlKey, modified=false, randomTemp) {
   let query = 'SELECT c.id, c.violations, c.urlKey FROM c'
   if (urlKey)
     query += ` WHERE c.urlKey = "${urlKey}"`
@@ -13,7 +13,7 @@ export default async function queryViolations(urlKey, modified=false) {
     .query(query)
     .fetchAll();
 
-  console.log({query, items, cid: container.id, did: container.database.id, urlKey})
+  console.log({query, items, cid: container.id, did: container.database.id, urlKey, randomTemp})
 
   if (items.length) {
     console.log('got items', items)
