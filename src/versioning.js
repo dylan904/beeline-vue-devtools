@@ -1,14 +1,18 @@
+console.log('init versioning')
 import { fileURLToPath } from 'url'
 import { dirname, resolve } from 'path'
 import { loadEnv } from 'vite'
 
+console.log('import cosmos.js')
 import cosmos from './utils/audit/cosmos/index.js' // singleton
+
+console.log('import git.js')
 import git from './utils/versioning/git.js'  // singleton
 
 console.log('import getCosmosViolationOps.js')
 import getCosmosViolationOps from './utils/versioning/getCosmosViolationOps.js'
 
-console.log('import ./utils/versioning/updateTrackingRepo.js')
+console.log('import updateTrackingRepo.js')
 import updateTrackingRepo from './utils/versioning/updateTrackingRepo.js'
 
 const a11yBranch = 'a11y-file-tracking'
