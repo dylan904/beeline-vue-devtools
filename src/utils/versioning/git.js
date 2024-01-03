@@ -12,56 +12,49 @@ class Git {
     }
 
     async isRepo() {
-        const { stdout } = await this.exec(`git rev-parse --is-inside-work-tree`)
-        return stdout.trim() === 'true'
+        const { result } = await this.tryExec(`git rev-parse --is-inside-work-tree`)
+        return result.trim() === 'true'
     }
 
     async hasCommits() {
-        try {
-            await this.exec(`git log`)
-            return true
-        } catch(error) {
-            return false
-        }
+        const { result } = await this.tryExec(`git log`)
+        return !!result.trim()
     }
 
     async isFileTracked(filePath) {
-        const { stdout: trackedChanges } = await this.exec(`git ls-files ${filePath}`)
+        const { result: trackedChanges } = await this.tryExec(`git ls-files ${filePath}`)
         return !!trackedChanges
     }
 
     async fileHasChanges(filePath, staged) {  // changes relative to working directory, compared to last commit (HEAD)
         const flags = staged ? '--staged' : ''
-        const { stdout: changes } = await this.exec(`git diff ${flags} ${filePath}`)
+        const { result: changes } = await this.tryExec(`git diff ${flags} ${filePath}`)
         return !!changes
     }
 
     async addFile(filePath) {
-        try {
-            await this.exec(`git add ${filePath}`)
-            return {}
-        } catch(error) {
-            return { error }
-        }
+        await this.tryExec(`git add ${filePath}`)
+    }
+
+    async getUntrackedFiles() {
+        const { result: rawUntrackedFiles } = await this.tryExec('git status --porcelain | grep "^??"')
+        const untrackedFiles = rawUntrackedFiles.split('??').map(file => file.trim())
+        untrackedFiles.shift()
+        return untrackedFiles
     }
 
     async commitFiles(filePaths, message="File tracking commit", flags=[], ignoreUntracked=false) {
         if (filePaths.length) {
             for (const filePath of filePaths) {
-                const { stderr: addErr } = await this.exec(`git add ${filePath}`)
-                if (addErr) {
-                    throw(addErr)
-                }
+                await this.addFile(filePath)
             }
             const args = [`-m "${message}"`, ...flags]
             try {
                 await this.exec(`git commit ${ args.join(' ') }`)
             } catch(commitErr) {
                 if (ignoreUntracked) {
-                    const { stdout: rawUntackedFiles } = await this.exec('git status --porcelain | grep "^??"')
-                    const untackedFiles = rawUntackedFiles.split('??').map(file => file.trim())
-                    untackedFiles.shift()
-                    console.log({ untackedFiles })
+                    const untrackedFiles = await this.getUntrackedFiles()
+                    console.log({ untrackedFiles })
                 }
             }
             const commitHash = await this.exec(`git rev-parse HEAD`)
@@ -71,50 +64,36 @@ class Git {
     }
 
     async getFileCommitHash(filePath) { // assumes you're on correct branch
-        const { stdout: commitHash } = await this.exec(`git rev-list -1 HEAD -- ${filePath}`)
+        const { result: commitHash } = await this.tryExec(`git rev-list -1 HEAD -- ${filePath}`)
         return commitHash.trim()
     }
 
     async fileDiffersFromCommit(filePath, commitHash) {  // changes relative to last commit (HEAD), compared to a specific commit hash
-        const { stdout: changes } = await this.exec(`git diff ${commitHash}^..HEAD -- ${filePath}`)
+        const { result: changes } = await this.tryExec(`git diff ${commitHash}^..HEAD -- ${filePath}`)
         return !!changes.trim()
     }
 
     async fileExists(filePath) {
-        const { stdout: existingFilePath } = await this.exec(`git ls-files ${filePath}`)
+        const { result: existingFilePath } = await this.tryExec(`git ls-files ${filePath}`)
         return !!existingFilePath.trim()
     }
 
     async branchExists(branchName) {
-        try {
-            const { stdout: existingBranchName } = await this.exec(`git rev-parse --verify ${branchName}`)
-            return !!existingBranchName.trim()
-        } catch(err) {
-            return false
-        }
+        const { result: existingBranchName } = await this.tryExec(`git rev-parse --verify ${branchName}`)
+        return !!existingBranchName.trim()
     }
 
     async getCurrentBranch() {
-        const { stdout: currentBranchName } = await this.exec(`git rev-parse --abbrev-ref HEAD`)
+        const { result: currentBranchName } = await this.tryExec(`git rev-parse --abbrev-ref HEAD`)
         return currentBranchName.trim()
     }
 
     async createBranch(branchName) {
-        try {
-            await this.exec(`git checkout -b ${branchName}`)
-            return {}
-        } catch(error) {
-            return { error }
-        }
+        return await this.tryExec(`git checkout -b ${branchName}`)
     }
 
     async checkoutBranch(branchName) {
-        try {
-            await this.exec(`git checkout ${branchName}`)
-            return {}
-        } catch(error) {
-            return { error }
-        }
+        return await this.exec(`git checkout ${branchName}`)
     }
 
     async forcefullyCheckoutBranch(branchName) {
@@ -129,16 +108,22 @@ class Git {
     }
 
     async checkoutFileFromBranch(filePath, branchName) {
-        try {
-            await this.exec(`git checkout ${branchName} -- ${filePath}`)
-        } catch(error) {
-            return { error }
-        }
+        return await this.tryExec(`git checkout ${branchName} -- ${filePath}`)
     }
 
-    async getUserEmail() {
-        const { stdout: email } = await this.exec('git config user.email')
-        return email.trim()
+    async getConfigProp(prop) {
+        const { stdout: result } = await this.tryExec(`git config ${prop}`)
+        return result.trim()
+    }
+
+    async tryExec (command) {
+        try {
+            const { stdout } = await this.exec(command)
+            return { result: stdout }
+        } catch(error) {
+            console.warn(error)
+            return { error }
+        }
     }
 }
 

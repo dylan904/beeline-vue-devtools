@@ -46,7 +46,7 @@ export async function getA11yConfig(importURL) {
   const newProcessProps = {
     'process.env.project': '"' + packageJSON.name + '"',
     'process.env.version': '"' + packageJSON.version + '"',
-    'process.env.author': '"' + await git.getUserEmail() + '"',
+    'process.env.author': '"' + await git.getConfig('user.email') + '"',
     'process.env.AUDITA11Y': process.env.AUDITA11Y || '""',
     'process.env.VITE_A11Y_COSMOS_CONNECTION_STRING': '"' + process.env.VITE_A11Y_COSMOS_CONNECTION_STRING + '"'
   }
@@ -57,8 +57,9 @@ export async function getA11yConfig(importURL) {
   }
 
   // set revisions after so it can access cosmos string
-  console.log('get revisions?')
+  
   const revisions = await getRevisions(packageJSON.name, packageJSON.version)
+  console.log('got revisions?', revisions)
   newProcessProps['process.env.revisions'] = revisions
   process.env.revisions = revisions
 
@@ -68,7 +69,7 @@ export async function getA11yConfig(importURL) {
 async function getRevisions(packageName, packageVersion) {
   try {
     if (!cosmos.getContainer()) {
-      console.log('initfromrev')
+      console.log('initfromrev', packageName, packageVersion)
       await cosmos.init(packageName, packageVersion)
       console.log('niceone cosmos inited')
     }
