@@ -112,7 +112,7 @@ class Git {
     }
 
     async getConfigProp(prop) {
-        const { stdout: result } = await this.tryExec(`git config ${prop}`)
+        const { result } = await this.tryExec(`git config ${prop}`)
         return result.trim()
     }
 
