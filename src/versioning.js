@@ -28,7 +28,6 @@ export async function getPackageJSON(importURL) {
 }
 
 export async function getA11yConfig(importURL) {
-
   console.log('testrepo2', (await git.hasCommits()), dirname(fileURLToPath(importURL)), await git.isRepo())
   
   try {
@@ -45,8 +44,9 @@ export async function getA11yConfig(importURL) {
   const newProcessProps = {
     'process.env.project': '"' + packageJSON.name + '"',
     'process.env.version': '"' + packageJSON.version + '"',
-    'process.env.author': '"' + await git.getConfigProp('user.email') + '"',
+    'process.env.author': '"' + (await git.getConfigProp('user.email')) + '"',
     'process.env.AUDITA11Y': process.env.AUDITA11Y || '""',
+    'process.env.projectRoot': '"' + importURL + '"',
     'process.env.VITE_A11Y_COSMOS_CONNECTION_STRING': '"' + process.env.VITE_A11Y_COSMOS_CONNECTION_STRING + '"'
   }
 
