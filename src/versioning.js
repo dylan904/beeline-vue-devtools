@@ -57,6 +57,7 @@ export async function getA11yConfig(importURL) {
   }
 
   // set revisions after so it can access cosmos string
+  console.log('get revisions?')
   const revisions = await getRevisions(packageJSON.name, packageJSON.version)
   newProcessProps['process.env.revisions'] = revisions
   process.env.revisions = revisions
@@ -69,14 +70,17 @@ async function getRevisions(packageName, packageVersion) {
     if (!cosmos.getContainer()) {
       console.log('initfromrev')
       await cosmos.init(packageName, packageVersion)
+      console.log('niceone cosmos inited')
     }
   } catch(err) {
     console.warn('Cant get revisions: ' + err)
     return {}
   }
+  console.log('niceone get branch')
   const currentBranch = await git.forcefullyCheckoutBranch(a11yBranch)
-
+console.log('niceone', {currentBranch})
   try {
+    console.log('try update', currentBranch)
     const revisions = await updateTrackingRepo()
     console.log('try call findAndUpdatePendingOps')
     setTimeout(() => findAndUpdatePendingOps.call(this, currentBranch))
