@@ -7,7 +7,6 @@ import git from './utils/versioning/git.js'  // singleton
 
 import getCosmosViolationOps from './utils/versioning/getCosmosViolationOps.js'
 import updateTrackingRepo from './utils/versioning/updateTrackingRepo.js'
-import { cpuUsage } from 'process'
 
 const a11yBranch = 'a11y-file-tracking'
 console.log('hii2')
@@ -66,7 +65,7 @@ export async function getA11yConfig(importURL) {
   return newProcessProps
 }
 
-async function getRevisions(packageName, packageVersion) {
+export async function getRevisions(packageName, packageVersion) {
   try {
     if (!cosmos.getContainer()) {
       console.log('initfromrev', packageName, packageVersion)
