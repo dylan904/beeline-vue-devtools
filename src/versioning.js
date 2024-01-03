@@ -38,6 +38,8 @@ export async function getA11yConfig(importURL) {
   }
 
   process.env = { ...process.env, ...loadEnv(process.env.NODE_ENV, process.cwd()) }
+
+  console.log('setimport')
   
   const packageJSON = await getPackageJSON(importURL)
   console.log({packageJSON})
@@ -52,6 +54,7 @@ export async function getA11yConfig(importURL) {
 
   for (const propKey in newProcessProps) {
     const value = newProcessProps[propKey]
+    console.log('setprocessprop', {prop: propKey.replace('process.env.', ''), value: value.substring(1, value.length-1)})
     process.env[propKey.replace('process.env.', '')] = value.substring(1, value.length-1)
   }
 
