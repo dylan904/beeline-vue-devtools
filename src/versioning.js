@@ -5,7 +5,10 @@ import { loadEnv } from 'vite'
 import cosmos from './utils/audit/cosmos/index.js' // singleton
 import git from './utils/versioning/git.js'  // singleton
 
+console.log('import getCosmosViolationOps.js')
 import getCosmosViolationOps from './utils/versioning/getCosmosViolationOps.js'
+
+console.log('import ./utils/versioning/updateTrackingRepo.js')
 import updateTrackingRepo from './utils/versioning/updateTrackingRepo.js'
 
 const a11yBranch = 'a11y-file-tracking'
