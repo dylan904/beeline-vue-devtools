@@ -5,9 +5,9 @@ import { promisify } from 'util'
 import { exec } from 'child_process'
 
 const execPromise = promisify(exec)
-const componentFiles = getComponentFiles()
 
 export default async function updateTrackingRepo() { // commit modified files to secondary branch for version reference
+  const componentFiles = getComponentFiles()
   const revisions = {}
   const { newCommitHash, existingCommitFiles, newCommitFiles } = await commitModifiedFiles(componentFiles)
 
