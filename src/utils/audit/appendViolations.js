@@ -61,6 +61,8 @@ function appendPendingViolation(newV, pendingViolations, modifiedCompNodes, pend
   const pendingViolation = pendingViolations.find(v => v.id === newVCopy.id)
   newVCopy.nodes = modifiedCompNodes.filter(filterOutRoot)
 
+  console.log('appendPending', {pendingViolation, newVCopy, modifiedCompNodes})
+
   if (pendingViolation) {
     for (const newNode of modifiedCompNodes.filter(filterOutRoot)) {
       pendingOps.push(vOps.addNode(vi, newNode))
