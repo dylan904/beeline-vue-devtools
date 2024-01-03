@@ -11,8 +11,9 @@ export default function fromDir(startPath, filter, callback) {
     for (const file of files) {
         const filename = path.join(startPath, file)
         const stat = fs.lstatSync(filename)
-        if (stat.isDirectory()) {
+        if (stat.isDirectory())
           fromDir(filename, filter, callback) //recurse
-        } else if (filter.test(filename)) callback(filename)
-    };
+        else if (filter.test(filename)) 
+            callback(filename)
+    }
 }

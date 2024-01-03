@@ -2,7 +2,6 @@ import git from "./git.js"  // singleton
 
 export default async function gitCommitHashs(filePaths) {
   for (const filePath of filePaths) {
-    console.log('gitCommitHash()', git.isFileTracked(filePath), filePath)
     if (!git.isFileTracked(filePath)) {
       const { error: addError } = await git.addFile(filePath)
       if (addError)

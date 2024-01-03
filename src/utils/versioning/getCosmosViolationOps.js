@@ -13,7 +13,6 @@ export default async function getCosmosViolationOps(srcViolations, violations, i
 
     for (const [nIdx, node] of violation.nodes.reverse().entries()) {
       const component = node.component
-      //console.log('componentcheck', component, node)
       if (component?.file && component?.commitHash) {
         const componentFileDiffersFromCommit = await git.fileDiffersFromCommit(component.file, component.commitHash)
         console.log('filediffers', componentFileDiffersFromCommit, component.file)
@@ -26,8 +25,6 @@ export default async function getCosmosViolationOps(srcViolations, violations, i
       }
     }
     violation.nodes.reverse() // re-reverse
-
-    console.log('checkit', nodeCount, heldOps)
 
     if (nodeCount && heldOps.pending.length === nodeCount) {
       if (isPending)

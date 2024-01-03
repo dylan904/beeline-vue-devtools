@@ -1,32 +1,11 @@
 import { fileURLToPath } from 'url'
-import { dirname, resolve } from 'path'
+import { dirname } from 'path'
 import { loadEnv } from 'vite'
-import cosmos from './utils/audit/cosmos/index.js' // singleton
 import git from './utils/versioning/git.js'  // singleton
-import getCosmosViolationOps from './utils/versioning/getCosmosViolationOps.js'
-import updateTrackingRepo from './utils/versioning/updateTrackingRepo.js'
-
-const a11yBranch = 'a11y-file-tracking'
-
-export async function getPackageJSON(importURL) {
-  try {
-    console.log({importURL})
-    const __dirname = dirname(fileURLToPath(importURL))
-    const resolvedPackagePath = resolve(__dirname, './package.json')
-    console.log({resolvedPackagePath})
-    const packageModule = await import(resolvedPackagePath, {
-      assert: { type: 'json' }
-    })
-    return packageModule.default
-  }
-  catch(err) {
-    console.log(err)
-  }
-}
+import getRevisions from './utils/versioning/getRevisions.js'
+import getPackageJSON from './utils/versioning/getPackageJSON.js'
 
 export async function getA11yConfig(importURL) {
-  console.log('testrepo2', (await git.hasCommits()), dirname(fileURLToPath(importURL)), await git.isRepo())
-  
   try {
     await git.init()
   } catch(err) {
@@ -35,11 +14,8 @@ export async function getA11yConfig(importURL) {
   }
 
   process.env = { ...process.env, ...loadEnv(process.env.NODE_ENV, process.cwd()) }
-
-  console.log('setimport')
   
   const packageJSON = await getPackageJSON(importURL)
-  console.log({packageJSON})
   const newProcessProps = {
     'process.env.project': '"' + packageJSON.name + '"',
     'process.env.version': '"' + packageJSON.version + '"',
@@ -51,46 +27,16 @@ export async function getA11yConfig(importURL) {
 
   for (const propKey in newProcessProps) {
     const value = newProcessProps[propKey]
-    console.log('setprocessprop', {prop: propKey.replace('process.env.', ''), value: value.substring(1, value.length-1)})
     process.env[propKey.replace('process.env.', '')] = value.substring(1, value.length-1)
   }
 
   // set revisions after so it can access cosmos string
-  
   const revisions = await getRevisions(packageJSON.name, packageJSON.version)
   console.log('got revisions?', revisions)
   newProcessProps['process.env.revisions'] = revisions
   process.env.revisions = revisions
 
   return newProcessProps
-}
-
-export async function getRevisions(packageName, packageVersion) {
-  try {
-    if (!cosmos.getContainer()) {
-      console.log('initfromrev', packageName, packageVersion)
-      await cosmos.init(packageName, packageVersion)
-      console.log('niceone cosmos inited')
-    }
-  } catch(err) {
-    console.warn('Cant get revisions: ' + err)
-    return {}
-  }
-  console.log('niceone get branch')
-  const currentBranch = await git.forcefullyCheckoutBranch(a11yBranch)
-console.log('niceone', {currentBranch})
-  try {
-    console.log('try update', currentBranch)
-    const revisions = await updateTrackingRepo()
-    console.log('try call findAndUpdatePendingOps')
-    setTimeout(() => findAndUpdatePendingOps.call(this, currentBranch))
-
-    return revisions
-  }
-  catch (err) {
-    console.warn(err)
-    git.checkoutBranch(currentBranch)
-  }
 }
 
 export function revisionWatcherVitePlugin() {
@@ -108,56 +54,4 @@ export function revisionWatcherVitePlugin() {
       }
     }
   }
-}
-
-function joinArraysByProp(array1, array1name, array2, array2name, prop=id) {
-  const propSet = new Set([...array1.map(obj => obj[prop]), ...array2.map(obj => obj[prop])])
-
-  return Array.from(propSet).map(propValue => {
-    const obj1 = array1.find(obj => obj[prop] === propValue)
-    const obj2 = array2.find(obj => obj[prop] === propValue)
-    const output = {}
-    if (obj1)
-      output[array1name] = { ...obj1 }
-    if (obj2)
-      output[array2name] = { ...obj2 }
-    return output
-  })
-}
-
-async function findAndUpdatePendingOps(currentBranch) {
-  console.log('in findAndUpdatePendingOps', currentBranch)
-  const currentOps = []
-  const pendingOps = []
-  
-  const qResultsCurrent = await cosmos.queryViolations(null, false)
-  const qResultsPending = await cosmos.queryViolations(null, true)
-  const syncedPageViolationSet = joinArraysByProp(qResultsCurrent, 'current', qResultsPending, 'pending', 'urlKey')
-
-  console.log({qResultsCurrent, qResultsPending})
-
-  for (const syncedPageViolations of syncedPageViolationSet) {
-    const pendingViolations = syncedPageViolations.pending?.violations || []
-    const currentViolations = syncedPageViolations.current?.violations || []
-    console.log('loop', {pendingViolations, currentViolations})
-
-    const opsFromPending = await getCosmosViolationOps(pendingViolations, currentViolations, true)
-    const opsFromCurrent = await getCosmosViolationOps(currentViolations, pendingViolations, false)
-
-    pendingOps.push( ...opsFromPending.pending, ...opsFromCurrent.pending )
-    currentOps.push( ...opsFromPending.current, ...opsFromCurrent.pending )
-  }
-  console.log({syncedPageViolationSet})
-  console.log({pendingOps, currentOps})
-  console.log({currentBranch})
-
-  git.checkoutBranch(currentBranch)    // return to previous branch
-
-  if (pendingOps.length) {
-    //await cosmos.updateViolations(qResultPending.id, pendingOps, true)
-  }
-  if (currentOps.length) {
-    //await cosmos.updateViolations(qResultCurrent.id, currentOps)
-  }
-  console.log('finished findAndUpdatePendingOps')
 }

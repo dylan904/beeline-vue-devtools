@@ -20,9 +20,6 @@ export default async function commitModifiedFiles(filePaths) {
     }
   }
 
-  console.log('try test', newCommitFiles)
-
   const newCommitHash = await git.commitFiles(newCommitFiles, "File tracking commit", ['-u'], true)
-  console.log('try return', { newCommitHash, existingCommitFiles, newCommitFiles })
   return { newCommitHash, existingCommitFiles, newCommitFiles }
 }
