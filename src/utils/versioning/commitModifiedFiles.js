@@ -7,6 +7,7 @@ export default async function commitModifiedFiles(filePaths) {
   for (const filePath of filePaths) {
     if (await git.fileExists(filePath)) {
       const exisitingHash = await git.getFileCommitHash(filePath)
+      console.log('file rev check', (await git.fileDiffersFromCommit(filePath, exisitingHash)), {filePath, exisitingHash})
       if (await git.fileDiffersFromCommit(filePath, exisitingHash)) {
         // TODO: delete linked violations from pending DB (linked via violation -> node -> component -> hash)
         newCommitFiles.push(filePath)
