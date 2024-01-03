@@ -61,8 +61,9 @@ export default async function scan(router, violations, firstRun) {
           "op": "set", 
           "path": "/violations", 
           "value": recordedViolations.pending
-        }])
+        }], true)
       }
+      console.log('aftermath', {recordedViolations})
     }
 
     if (firstRun) {
