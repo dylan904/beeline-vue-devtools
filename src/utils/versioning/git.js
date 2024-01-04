@@ -69,7 +69,7 @@ class Git {
     }
 
     async fileDiffersFromCommit(filePath, commitHash) {  // changes relative to last commit (HEAD), compared to a specific commit hash
-        const { result: changes } = await this.tryExec(`git diff ${commitHash}^..HEAD -- ${filePath}`)
+        const { result: changes } = await this.tryExec(`git diff ${commitHash}..HEAD -- ${filePath}`)
         return !!changes.trim()
     }
 
