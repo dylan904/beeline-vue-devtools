@@ -1,4 +1,5 @@
 import cosmos from '../audit/cosmos/index.js' // singleton
+import git from './git.js'
 import updateTrackingRepo from './updateTrackingRepo.js'
 import findAndUpdatePendingOps from './findAndUpdatePendingOps.js'
 
