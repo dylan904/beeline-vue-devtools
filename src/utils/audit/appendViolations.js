@@ -63,13 +63,15 @@ function appendPendingViolation(newV, pendingViolations, modifiedCompNodes, pend
 
   console.log('appendPending', {pendingViolation, newVCopy, modifiedCompNodes})
 
-  if (pendingViolation) {
-    for (const newNode of modifiedCompNodes.filter(filterOutRoot)) {
-      pendingOps.push(vOps.addNode(vi, newNode))
+  if (newVCopy.nodes.length) {
+    if (pendingViolation) {
+      for (const newNode of modifiedCompNodes.filter(filterOutRoot)) {
+        pendingOps.push(vOps.addNode(vi, newNode))
+      }
     }
-  }
-  else {
-    pendingViolations.push(newVCopy)
-    pendingOps.push(vOps.addViolation(newVCopy))
+    else {
+      pendingViolations.push(newVCopy)
+      pendingOps.push(vOps.addViolation(newVCopy))
+    }
   }
 }
