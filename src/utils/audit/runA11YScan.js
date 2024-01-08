@@ -37,10 +37,11 @@ export default async function scan(router, violations, firstRun) {
         current: qResult.current.violations || [],
         pending: qResult.pending.violations || []
       }
-
       console.log({currentRecorded: recordedViolations.current, pendingRecorded: recordedViolations.pending, idc: qResult.current.id, idp: qResult.pending.id})
+
       const { altered, ops } = appendViolations(recordedViolations.current, violations, recordedViolations.pending)
       console.log({altered, ops})
+
       if (recordedViolations.current.length) {
         if (ops.current.length) 
           cosmos.updateViolations(qResult.current.id, ops.current, false)
@@ -49,7 +50,7 @@ export default async function scan(router, violations, firstRun) {
         cosmos.updateViolations(qResult.current.id, [{ 
           "op": "set", 
           "path": "/violations", 
-          "value": recordedViolations.current
+          "value": []
         }])
       }
       if (recordedViolations.pending.length) {
@@ -57,10 +58,10 @@ export default async function scan(router, violations, firstRun) {
           cosmos.updateViolations(qResult.pending.id, ops.pending, true)
       }
       else {
-        cosmos.updateViolations(qResult.current.id, [{ 
+        cosmos.updateViolations(qResult.pending.id, [{ 
           "op": "set", 
           "path": "/violations", 
-          "value": recordedViolations.pending
+          "value": []
         }], true)
       }
     }
@@ -68,10 +69,11 @@ export default async function scan(router, violations, firstRun) {
     if (firstRun) {
       const auditCooler = new cooler(2000, scan)
       const mutationsObserver = new MutationObserver(mutations => {
-          setTimeout(auditCooler.proxy.call(auditCooler, router, violations), 500)
+        setTimeout(auditCooler.proxy.call(auditCooler, router, violations), 500)
       })
       mutationsObserver.observe(document.body, { subtree: true, childList: true, attributes: true })
     }
   }
+
   return result
 }
