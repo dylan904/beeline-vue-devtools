@@ -118,7 +118,7 @@ class Git {
     }
     
     async applyStash(n) {
-        const hasN = (typeof n === 'undefined')
+        const hasN = (typeof n !== 'undefined')
         const cmd = hasN ? `git stash apply stash@{${n}}` : `git stash apply`
         await this.tryExec(cmd)
     }
