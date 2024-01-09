@@ -57,8 +57,8 @@ class Git {
                     console.log({ untrackedFiles })
                 }
             }
-            const commitHash = await this.exec(`git rev-parse HEAD`)
-            return commitHash
+            const { stdout: commitHash } = await this.exec(`git rev-parse HEAD`)
+            return commitHash.trim()
         }
         return null
     }
