@@ -1,9 +1,8 @@
 import cosmos from '../audit/cosmos/index.js'
-import git from './git.js'
 import getCosmosViolationOps from './getCosmosViolationOps.js'
 import joinArraysByProp from '../general/joinArraysByProp.js'
 
-export default async function findAndUpdatePendingOps(currentBranch) {
+export default async function findAndUpdatePendingOps() {
   const currentOps = []
   const pendingOps = []
   
@@ -26,9 +25,6 @@ export default async function findAndUpdatePendingOps(currentBranch) {
   }
   console.log({syncedPageViolationSet})
   console.log({pendingOps, currentOps})
-  console.log({currentBranch})
-
-  git.checkoutBranch(currentBranch)    // return to previous branch
 
   if (pendingOps.length) {
     //await cosmos.updateViolations(qResultPending.id, pendingOps, true)

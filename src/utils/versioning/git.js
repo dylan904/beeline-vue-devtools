@@ -57,7 +57,7 @@ class Git {
                     console.log({ untrackedFiles })
                 }
             }
-            const { stdout: commitHash } = await this.exec(`git rev-parse HEAD`)
+            const { result: commitHash } = await this.tryExec(`git rev-parse HEAD`)
             return commitHash.trim()
         }
         return null
@@ -105,11 +105,22 @@ class Git {
         else
             await this.checkoutBranch(branchName)
 
+
         return currentBranch
     }
 
     async checkoutFileFromBranch(filePath, branchName) {
         return await this.tryExec(`git checkout ${branchName} -- ${filePath}`)
+    }
+
+    async stash() {
+        await this.tryExec(`git stash`)
+    }
+    
+    async applyStash(n) {
+        const hasN = (typeof n === 'undefined')
+        const cmd = hasN ? `git stash apply stash@{${n}}` : `git stash apply`
+        await this.tryExec(cmd)
     }
 
     async getConfigProp(prop) {
