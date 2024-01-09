@@ -32,7 +32,7 @@ export async function getA11yConfig(importURL) {
 
   // set revisions after so it can access cosmos string
   const revisions = await getRevisions(packageJSON.name, packageJSON.version)
-  console.log('got revisions?', revisions)
+  console.log('got revisions', revisions)
   newProcessProps['process.env.revisions'] = revisions
   process.env.revisions = revisions
 
@@ -43,8 +43,8 @@ export function revisionWatcherVitePlugin() {
   return {
     name: 'beeline-revision-watcher',
     enforce: 'post',
-    async handleHotUpdate({ file, server, modules }) {
-      console.log('reloading revisions...', file.endsWith('.vue'), {file, modules});
+    async handleHotUpdate({ file, server }) {
+      console.log('reloading revisions...', file.endsWith('.vue'), {file});
       if (file.endsWith('.vue')) {
         server.ws.send({
           type: 'custom',

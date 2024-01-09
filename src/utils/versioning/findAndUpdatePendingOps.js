@@ -16,7 +16,7 @@ export default async function findAndUpdatePendingOps(currentBranch) {
   for (const syncedPageViolations of syncedPageViolationSet) {
     const pendingViolations = syncedPageViolations.pending?.violations || []
     const currentViolations = syncedPageViolations.current?.violations || []
-    console.log('loop', {pendingViolations, currentViolations})
+    // console.log('loop', {pendingViolations, currentViolations})
 
     const opsFromPending = await getCosmosViolationOps(pendingViolations, currentViolations, true)
     const opsFromCurrent = await getCosmosViolationOps(currentViolations, pendingViolations, false)
