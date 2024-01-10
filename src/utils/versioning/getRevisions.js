@@ -12,11 +12,11 @@ export default async function getRevisions(packageName, packageVersion) {
         }
     } catch(err) {
         console.warn('Cant get revisions: ' + err)
-        git.checkoutBranch(currentBranch)
+        await git.checkoutBranch(currentBranch)
         return {}
     }
 
-    git.stash()
+    await git.stash()
     const currentBranch = await git.forcefullyCheckoutBranch(a11yBranch)
 
     let revisions
@@ -28,10 +28,10 @@ export default async function getRevisions(packageName, packageVersion) {
         return {}
     }
 
-    git.checkoutBranch(currentBranch)    // return to previous branch
+    await git.checkoutBranch(currentBranch)    // return to previous branch
 
     try {
-        git.popStash()
+        await git.popStash()
     }
     catch (err) {
         console.warn('Cant recover stashed changes: ' + err)
