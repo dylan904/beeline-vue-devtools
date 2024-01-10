@@ -114,13 +114,15 @@ class Git {
     }
 
     async stash() {
-        await this.tryExec(`git stash`)
+        await this.tryExec(`git stash push -m "a11y git.js stash"`)
     }
     
-    async applyStash(n) {
-        const hasN = (typeof n !== 'undefined')
-        const cmd = hasN ? `git stash apply stash@{${n}}` : `git stash apply`
-        await this.tryExec(cmd)
+    async applyStash(n=0) {
+        await this.tryExec(`git stash apply stash@{${n}}`)
+    }
+
+    async popStash(n=0, retry) {
+        await this.tryExec(`git stash pop stash@{${n}}`)
     }
 
     async getConfigProp(prop) {
