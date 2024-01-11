@@ -39,7 +39,7 @@ class Git {
     async getUntrackedFiles() {
         const { result: rawUntrackedFiles } = await this.tryExec('git status --porcelain | grep "^??"')
         const untrackedFiles = rawUntrackedFiles.split('??').map(file => file.trim())
-        untrackedFiles.shift()
+        untrackedFiles.shift()  // last line empty
         return untrackedFiles
     }
 
@@ -105,7 +105,6 @@ class Git {
         else
             await this.checkoutBranch(branchName)
 
-
         return currentBranch
     }
 
@@ -113,16 +112,46 @@ class Git {
         return await this.tryExec(`git checkout ${branchName} -- ${filePath}`)
     }
 
+    async #getStoredStagedFiles() {
+        const currentBranch = await this.getCurrentBranch()
+        return cache.get(`stagedFiles[${currentBranch}]`)
+    }
+
+    async #setStoredStagedFiles() {
+        const currentBranch = await this.getCurrentBranch()
+        const { result: stagedResult } = await this.tryExec(`git diff --staged --name-only`)
+        const stagedFiles = splitLines(stagedResult)
+        cache.set(`stagedFiles[${currentBranch}]`, stagedFiles)
+    }
+
+    async #restoreStagedChanges() {
+        const stagedFiles = await this.#getStoredStagedFiles()
+        if (stagedFiles && stagedFiles.length) {
+            const cmd = 'git add ' + stagedFiles.map(file => '"' + file + '"').join(' ')
+            await this.tryExec(cmd)
+        }
+    }
+
     async stash() {
+        // TODO: find real fix. for now, store staged changes seperately
+        this.#setStoredStagedFiles()
+
         await this.tryExec(`git stash push -m "a11y git.js stash"`)
     }
     
     async applyStash(n=0) {
         await this.tryExec(`git stash apply stash@{${n}}`)
+        await this.#restoreStagedChanges()
     }
 
-    async popStash(n=0, retry) {
+    async popStash(n=0) {
         await this.tryExec(`git stash pop stash@{${n}}`)
+        await this.#restoreStagedChanges()
+    }
+
+    async listFiles(flags=[]) {
+        const { result } = await this.tryExec(`git ls-files ${ flags.join(' ') }`)
+        return splitLines(result)
     }
 
     async getConfigProp(prop) {
@@ -144,3 +173,9 @@ class Git {
 Git.prototype.exec = promisify(exec)
   
 export default new Git()
+
+function splitLines(text) {
+    const output = text.split('\n')
+    output.pop()
+    return output
+} 

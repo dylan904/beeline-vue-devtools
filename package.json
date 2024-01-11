@@ -1,6 +1,6 @@
 {
   "name": "beeline-vue-devtools",
-  "version": "1.0.23",
+  "version": "1.0.24",
   "type": "module",
   "description": "",
   "main": "index.js",
