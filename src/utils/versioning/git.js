@@ -9,6 +9,10 @@ class Git {
         if (!(await this.isRepo())) {
             throw('Not a git repository (yet). Try running "git init"')
         }
+        if (!(await this.hasRemoteOrigin())) {
+            //throw('There needs to be a remote origin')
+            console.warn('There needs to be a remote origin')
+        }
         else if (!(await this.hasCommits())) {
             await this.exec('git commit --allow-empty -n -m "Initial commit."')
         }
@@ -21,13 +25,13 @@ class Git {
 
     async isFileTracked(filePath) {
         const { result: trackedChanges } = await this.tryExec(`git ls-files ${filePath}`)
-        return !!trackedChanges
+        return !!trackedChanges.trim()
     }
 
     async fileHasChanges(filePath, staged) {  // changes relative to working directory, compared to last commit (HEAD)
         const flags = staged ? '--staged' : ''
         const { result: changes } = await this.tryExec(`git diff ${flags} ${filePath}`)
-        return !!changes
+        return !!changes.trim()
     }
 
     async add(filePath) {
@@ -39,6 +43,11 @@ class Git {
         const untrackedFiles = rawUntrackedFiles.split('??').map(file => file.trim())
         untrackedFiles.shift()  // last line empty
         return untrackedFiles
+    }
+
+    async hasRemoteOrigin() {
+        const { result: remoteOrigins } = await this.tryExec(`git remote -v`)
+        return !!remoteOrigins.trim()
     }
 
     async hasCommits() {
@@ -65,12 +74,12 @@ class Git {
             const fileString = filePaths.map(file => '"' + file + '"').join(' ')
             this.add(fileString)
 
-            return await this.commit(message, flags, ignoreUntracked)
+            return await this.commit(message, flags, ignoreUntracked)   // return commit hash
         }
         return null
     }
 
-    async getFileCommitHash(filePath, location="HEAD") { // assumes you're on correct branch
+    async getFileCommitHash(filePath, location="HEAD") {
         const { result: commitHash } = await this.tryExec(`git rev-list -1 ${location} -- ${filePath}`)
         return commitHash.trim()
     }
@@ -97,11 +106,11 @@ class Git {
     }
 
     async createBranch(branchName) {
-        return await this.tryExec(`git checkout -b ${branchName}`)
+        await this.tryExec(`git checkout -b ${branchName}`)
     }
 
     async switchBranch(branchName) {
-        return await this.exec(`git switch ${branchName}`)
+        await this.tryExec(`git switch ${branchName}`)
     }
 
     async forcefullySwitchBranch(branchName) {
@@ -116,7 +125,7 @@ class Git {
     }
 
     async checkoutFileFromBranch(filePath, branchName) {
-        return await this.tryExec(`git checkout ${branchName} -- ${filePath}`)
+        await this.tryExec(`git checkout ${branchName} -- ${filePath}`)
     }
 
     async #getStoredStagedFiles() {

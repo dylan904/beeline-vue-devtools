@@ -23,6 +23,7 @@ export default async function getRevisions(packageName, packageVersion) {
     try {
         revisions = await updateTrackingRepo()
     } catch (err) {
+        await git.switchBranch(currentBranch)
         console.warn('Cant get revisions: ' + err)
         return {}
     }
