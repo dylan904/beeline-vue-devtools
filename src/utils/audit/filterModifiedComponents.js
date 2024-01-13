@@ -14,6 +14,7 @@ export default async function filterModifiedComponents(newNode) {
   
   if (componentInstance.type.__file) {
     const componentFile = componentInstance.type.__file.replace(srcPathRegex, 'src/')
+    console.log('checkFileRevisions', {componentFile, fullFile: componentInstance.type.__file})
     if (process.env.revisions[componentFile]) { // if file revised, store for later and check if pushed in recent commit
       componentInfo.commitHash = process.env.revisions[componentFile]
       componentInfo.file = `authors/${process.env.author}/${componentFile}`
