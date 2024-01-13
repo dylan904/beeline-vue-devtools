@@ -30,14 +30,7 @@ export default async function getRevisions(packageName, packageVersion) {
     }
 
     await git.switchBranch(currentBranch)    // return to previous branch
-
-    try {
-        await git.popStash()
-    }
-    catch (err) {
-        console.warn('Cant recover stashed changes: ' + err)
-        return {}
-    }
+    await git.popStash()
 
     setTimeout(() => findAndUpdatePendingOps) // call in new thread
     return revisions
