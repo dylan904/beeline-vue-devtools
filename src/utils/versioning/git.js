@@ -178,7 +178,7 @@ class Git {
         try {
             const { stdout, stderr } = await this.exec(command)
             console.log('debug', { command, stdout: stdout.trim(), stderr })
-            return { result: stdout ? stdout.trim() : null }
+            return { result: stdout ? stdout.trim() : '' }
         } catch(error) {
             console.warn(error)
             return { error }
