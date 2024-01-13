@@ -101,7 +101,7 @@ class Git {
     }
 
     async getDefaultBranch() {  // usually 'main' or 'master'
-        const { result: defaultBranchName } = await this.tryExec(`git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@'`)
+        const { result: defaultBranchName } = await this.tryExec(`git remote show origin | grep "HEAD branch" | awk '{print $NF}'`)
         return defaultBranchName.trim()
     }
 
