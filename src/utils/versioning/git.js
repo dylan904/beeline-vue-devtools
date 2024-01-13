@@ -136,7 +136,10 @@ class Git {
     async #setStoredStagedFiles() {
         const currentBranch = await this.getCurrentBranch()
         const { result: stagedResult } = await this.tryExec(`git diff --staged --name-only`)
+
+        //const stagedFiles = splitLines(stagedResult)
         const stagedFiles = stagedResult.split('\n')
+        console.log('setStored', {stagedFiles, stagedResult})
         cache.set(`stagedFiles[${currentBranch}]`, stagedFiles)
     }
 
@@ -192,3 +195,9 @@ class Git {
 Git.prototype.exec = promisify(exec)
   
 export default new Git()
+
+function splitLines(text) {
+    const output = text.split('\n')
+    output.pop()    // last line empty
+    return output
+}
