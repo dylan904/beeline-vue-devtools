@@ -84,8 +84,10 @@ class Git {
         return commitHash
     }
 
-    async fileDiffersFromCommit(filePath, commitHash, compareToHead=false) {  // changes relative to current state or last commit (HEAD), compared to a specific commit hash
-        const cmd = compareToHead ? `git diff ${commitHash}..HEAD -- ${filePath}` : `git diff ${commitHash} -- ${filePath}`
+    async fileDiffersFromCommit(filePath, commitHash, stash=false, branchName='', compareToHead=false) {  // changes relative to current state or last commit (HEAD), compared to a specific commit hash
+        const stashLocation = (stash !== false) ? `stash@{${stash}}` : ``
+        const location = compareToHead ? `${commitHash}..HEAD` : commitHash
+        const cmd = `git diff ${stashLocation} ${branchName} ${location} -- ${filePath}`
         const { result: changes } = await this.tryExec(cmd)
         return !!changes
     }
