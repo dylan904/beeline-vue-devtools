@@ -19,11 +19,6 @@ class Git {
         return result.trim() === 'true'
     }
 
-    async hasCommits() {
-        const { result } = await this.tryExec(`git log`)
-        return !!result.trim()
-    }
-
     async isFileTracked(filePath) {
         const { result: trackedChanges } = await this.tryExec(`git ls-files ${filePath}`)
         return !!trackedChanges
@@ -35,7 +30,7 @@ class Git {
         return !!changes
     }
 
-    async addFile(filePath) {
+    async add(filePath) {
         await this.tryExec(`git add ${filePath}`)
     }
 
@@ -46,28 +41,37 @@ class Git {
         return untrackedFiles
     }
 
+    async hasCommits() {
+        const { result } = await this.tryExec(`git log`)
+        return !!result.trim()
+    }
+
+    async commit(message="File tracking commit", flags=[], ignoreUntracked) {
+        const args = [`-m "${message}"`, ...flags]
+        try {
+            await this.exec(`git commit ${ args.join(' ') }`)
+        } catch(commitErr) {
+            if (ignoreUntracked) {
+                const untrackedFiles = await this.getUntrackedFiles()
+                console.log({ commitErr, untrackedFiles })
+            }
+        }
+        const { result: commitHash } = await this.tryExec(`git rev-parse HEAD`)
+        return commitHash.trim()
+    }
+
     async commitFiles(filePaths, message="File tracking commit", flags=[], ignoreUntracked=false) {
         if (filePaths.length) {
-            for (const filePath of filePaths) {
-                await this.addFile(filePath)
-            }
-            const args = [`-m "${message}"`, ...flags]
-            try {
-                await this.exec(`git commit ${ args.join(' ') }`)
-            } catch(commitErr) {
-                if (ignoreUntracked) {
-                    const untrackedFiles = await this.getUntrackedFiles()
-                    console.log({ untrackedFiles })
-                }
-            }
-            const { result: commitHash } = await this.tryExec(`git rev-parse HEAD`)
-            return commitHash.trim()
+            const fileString = filePaths.map(file => '"' + file + '"').join(' ')
+            this.add(fileString)
+
+            return await this.commit(message, flags, ignoreUntracked)
         }
         return null
     }
 
-    async getFileCommitHash(filePath) { // assumes you're on correct branch
-        const { result: commitHash } = await this.tryExec(`git rev-list -1 HEAD -- ${filePath}`)
+    async getFileCommitHash(filePath, location="HEAD") { // assumes you're on correct branch
+        const { result: commitHash } = await this.tryExec(`git rev-list -1 ${location} -- ${filePath}`)
         return commitHash.trim()
     }
 
@@ -75,11 +79,6 @@ class Git {
         const cmd = compareToHead ? `git diff ${commitHash}..HEAD -- ${filePath}` : `git diff ${commitHash} -- ${filePath}`
         const { result: changes } = await this.tryExec(cmd)
         return !!changes.trim()
-    }
-
-    async fileExists(filePath) {
-        const { result: existingFilePath } = await this.tryExec(`git ls-files ${filePath}`)
-        return !!existingFilePath.trim()
     }
 
     async branchExists(branchName) {
@@ -92,21 +91,26 @@ class Git {
         return currentBranchName.trim()
     }
 
+    async getDefaultBranch() {  // usually 'main' or 'master'
+        const { result: defaultBranchName } = await this.tryExec(`git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@'`)
+        return defaultBranchName.trim()
+    }
+
     async createBranch(branchName) {
         return await this.tryExec(`git checkout -b ${branchName}`)
     }
 
-    async checkoutBranch(branchName) {
-        return await this.exec(`git checkout ${branchName}`)
+    async switchBranch(branchName) {
+        return await this.exec(`git switch ${branchName}`)
     }
 
-    async forcefullyCheckoutBranch(branchName) {
+    async forcefullySwitchBranch(branchName) {
         const currentBranch = await this.getCurrentBranch() // hold current branch name
   
         if (!(await this.branchExists(branchName)))
             await this.createBranch(branchName)
         else
-            await this.checkoutBranch(branchName)
+            await this.switchBranch(branchName)
 
         return currentBranch
     }
@@ -130,8 +134,8 @@ class Git {
     async #restoreStagedChanges() {
         const stagedFiles = await this.#getStoredStagedFiles()
         if (stagedFiles && stagedFiles.length) {
-            const cmd = 'git add ' + stagedFiles.map(file => '"' + file + '"').join(' ')
-            await this.tryExec(cmd)
+            const fileString = stagedFiles.map(file => '"' + file + '"').join(' ')
+            await this.add(fileString)
         }
     }
 
@@ -179,6 +183,6 @@ export default new Git()
 
 function splitLines(text) {
     const output = text.split('\n')
-    output.pop()
+    output.pop()    // last line empty
     return output
-} 
+}

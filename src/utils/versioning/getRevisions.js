@@ -8,16 +8,15 @@ const a11yBranch = 'a11y-file-tracking'
 export default async function getRevisions(packageName, packageVersion) {
     try {
         if (!cosmos.getContainer()) {
-        await cosmos.init(packageName, packageVersion)
+            await cosmos.init(packageName, packageVersion)
         }
     } catch(err) {
         console.warn('Cant get revisions: ' + err)
-        await git.checkoutBranch(currentBranch)
         return {}
     }
 
     await git.stash()
-    const currentBranch = await git.forcefullyCheckoutBranch(a11yBranch)
+    const currentBranch = await git.forcefullySwitchBranch(a11yBranch)
 
     let revisions
   
@@ -28,7 +27,7 @@ export default async function getRevisions(packageName, packageVersion) {
         return {}
     }
 
-    await git.checkoutBranch(currentBranch)    // return to previous branch
+    await git.switchBranch(currentBranch)    // return to previous branch
 
     try {
         await git.popStash()
