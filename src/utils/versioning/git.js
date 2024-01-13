@@ -92,7 +92,7 @@ class Git {
 
     async branchExists(branchName) {
         const { result: existingBranchName } = await this.tryExec(`git rev-parse --verify ${branchName}`)
-        return !!existingBranchName.trim()
+        return !!existingBranchName
     }
 
     async getCurrentBranch() {
@@ -177,7 +177,8 @@ class Git {
 
     async tryExec (command) {
         try {
-            const { stdout } = await this.exec(command)
+            const { stdout, stderr } = await this.exec(command)
+            console.log('debug', { stdout, stderr })
             return { result: stdout }
         } catch(error) {
             console.warn(error)
