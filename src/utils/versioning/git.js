@@ -20,18 +20,18 @@ class Git {
 
     async isRepo() {
         const { result } = await this.tryExec(`git rev-parse --is-inside-work-tree`)
-        return result.trim() === 'true'
+        return result === 'true'
     }
 
     async isFileTracked(filePath) {
         const { result: trackedChanges } = await this.tryExec(`git ls-files ${filePath}`)
-        return !!trackedChanges.trim()
+        return !!trackedChanges
     }
 
     async fileHasChanges(filePath, staged) {  // changes relative to working directory, compared to last commit (HEAD)
         const flags = staged ? '--staged' : ''
         const { result: changes } = await this.tryExec(`git diff ${flags} ${filePath}`)
-        return !!changes.trim()
+        return !!changes
     }
 
     async add(filePath) {
@@ -41,18 +41,17 @@ class Git {
     async getUntrackedFiles() {
         const { result: rawUntrackedFiles } = await this.tryExec('git status --porcelain | grep "^??"')
         const untrackedFiles = rawUntrackedFiles.split('??').map(file => file.trim())
-        untrackedFiles.shift()  // last line empty
         return untrackedFiles
     }
 
     async hasRemoteOrigin() {
         const { result: remoteOrigins } = await this.tryExec(`git remote -v`)
-        return !!remoteOrigins.trim()
+        return !!remoteOrigins
     }
 
     async hasCommits() {
         const { result } = await this.tryExec(`git log`)
-        return !!result.trim()
+        return !!result
     }
 
     async commit(message="File tracking commit", flags=[], ignoreUntracked) {
@@ -66,7 +65,7 @@ class Git {
             }
         }
         const { result: commitHash } = await this.tryExec(`git rev-parse HEAD`)
-        return commitHash.trim()
+        return commitHash
     }
 
     async commitFiles(filePaths, message="File tracking commit", flags=[], ignoreUntracked=false) {
@@ -81,13 +80,13 @@ class Git {
 
     async getFileCommitHash(filePath, location="HEAD") {
         const { result: commitHash } = await this.tryExec(`git rev-list -1 ${location} -- ${filePath}`)
-        return commitHash.trim()
+        return commitHash
     }
 
     async fileDiffersFromCommit(filePath, commitHash, compareToHead=false) {  // changes relative to current state or last commit (HEAD), compared to a specific commit hash
         const cmd = compareToHead ? `git diff ${commitHash}..HEAD -- ${filePath}` : `git diff ${commitHash} -- ${filePath}`
         const { result: changes } = await this.tryExec(cmd)
-        return !!changes.trim()
+        return !!changes
     }
 
     async branchExists(branchName) {
@@ -97,12 +96,12 @@ class Git {
 
     async getCurrentBranch() {
         const { result: currentBranchName } = await this.tryExec(`git rev-parse --abbrev-ref HEAD`)
-        return currentBranchName.trim()
+        return currentBranchName
     }
 
     async getDefaultBranch() {  // usually 'main' or 'master'
         const { result: defaultBranchName } = await this.tryExec(`git remote show origin | grep "HEAD branch" | awk '{print $NF}'`)
-        return defaultBranchName.trim()
+        return defaultBranchName
     }
 
     async createBranch(branchName) {
@@ -136,7 +135,7 @@ class Git {
     async #setStoredStagedFiles() {
         const currentBranch = await this.getCurrentBranch()
         const { result: stagedResult } = await this.tryExec(`git diff --staged --name-only`)
-        const stagedFiles = splitLines(stagedResult)
+        const stagedFiles = stagedResult.split('\n')
         cache.set(`stagedFiles[${currentBranch}]`, stagedFiles)
     }
 
@@ -167,19 +166,19 @@ class Git {
 
     async listFiles(flags=[]) {
         const { result } = await this.tryExec(`git ls-files ${ flags.join(' ') }`)
-        return splitLines(result)
+        return result.split('\n')
     }
 
     async getConfigProp(prop) {
         const { result } = await this.tryExec(`git config ${prop}`)
-        return result.trim()
+        return result
     }
 
     async tryExec (command) {
         try {
             const { stdout, stderr } = await this.exec(command)
             console.log('debug', { command, stdout: stdout.trim(), stderr })
-            return { result: stdout }
+            return { result: stdout ? stdout.trim() : null }
         } catch(error) {
             console.warn(error)
             return { error }
@@ -190,9 +189,3 @@ class Git {
 Git.prototype.exec = promisify(exec)
   
 export default new Git()
-
-function splitLines(text) {
-    const output = text.split('\n')
-    output.pop()    // last line empty
-    return output
-}
