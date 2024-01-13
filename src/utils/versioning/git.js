@@ -3,6 +3,7 @@ import { exec } from 'child_process'
 import NodeCache from 'node-cache'
 
 const cache = new NodeCache()
+cache.flushAll()
 
 class Git {
     async init() {  // optional
