@@ -35,7 +35,7 @@ class Git {
     }
 
     async add(filePath) {
-        await this.tryExec(`git add ${filePath}`)
+        return await this.tryExec(`git add ${filePath}`)
     }
 
     async getUntrackedFiles() {
@@ -176,8 +176,9 @@ class Git {
 
     async tryExec (command) {
         try {
+            console.log('debug-pre', {command})
             const { stdout, stderr } = await this.exec(command)
-            console.log('debug', { command, stdout: stdout.trim(), stderr })
+            console.log('debug-post', { command, stdout: stdout.trim(), stderr })
             return { result: stdout ? stdout.trim() : '' }
         } catch(error) {
             console.warn(error)
