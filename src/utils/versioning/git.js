@@ -71,7 +71,8 @@ class Git {
     async commitFiles(filePaths, message="File tracking commit", flags=[], ignoreUntracked=false) {
         if (filePaths.length) {
             const fileString = filePaths.map(file => '"' + file + '"').join(' ')
-            this.add(fileString)
+            console.log('commitFiles add()', fileString)
+            await this.add(fileString)
 
             return await this.commit(message, flags, ignoreUntracked)   // return commit hash
         }
@@ -143,6 +144,7 @@ class Git {
         const stagedFiles = await this.#getStoredStagedFiles()
         if (stagedFiles && stagedFiles.length) {
             const fileString = stagedFiles.map(file => '"' + file + '"').join(' ')
+            console.log('commitFiles restoreStaged()', fileString, stagedFiles)
             await this.add(fileString)
         }
     }
