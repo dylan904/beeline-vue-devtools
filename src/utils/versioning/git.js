@@ -139,7 +139,7 @@ class Git {
         const { result: stagedResult } = await this.tryExec(`git diff --staged --name-only`)
 
         //const stagedFiles = splitLines(stagedResult)
-        const stagedFiles = stagedResult.split('\n')
+        const stagedFiles = splitLines(stagedResult)
         console.log('setStored', {stagedFiles, stagedResult})
         cache.set(`stagedFiles[${currentBranch}]`, stagedFiles)
     }
@@ -172,7 +172,7 @@ class Git {
 
     async listFiles(flags=[]) {
         const { result } = await this.tryExec(`git ls-files ${ flags.join(' ') }`)
-        return result.split('\n')
+        return splitLines(result)
     }
 
     async getConfigProp(prop) {
