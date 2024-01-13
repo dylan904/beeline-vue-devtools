@@ -72,7 +72,6 @@ class Git {
     async commitFiles(filePaths, message="File tracking commit", flags=[], ignoreUntracked=false) {
         if (filePaths.length) {
             const fileString = filePaths.map(file => '"' + file + '"').join(' ')
-            console.log('commitFiles add()', fileString)
             await this.add(fileString)
 
             return await this.commit(message, flags, ignoreUntracked)   // return commit hash
@@ -140,7 +139,6 @@ class Git {
 
         //const stagedFiles = splitLines(stagedResult)
         const stagedFiles = splitLines(stagedResult)
-        console.log('setStored', {stagedFiles, stagedResult})
         cache.set(`stagedFiles[${currentBranch}]`, stagedFiles)
     }
 
@@ -148,7 +146,6 @@ class Git {
         const stagedFiles = await this.#getStoredStagedFiles()
         if (stagedFiles && stagedFiles.length) {
             const fileString = stagedFiles.map(file => '"' + file + '"').join(' ')
-            console.log('commitFiles restoreStaged()', fileString, stagedFiles)
             await this.add(fileString)
         }
     }
@@ -182,9 +179,7 @@ class Git {
 
     async tryExec (command) {
         try {
-            console.log('debug-pre', {command})
-            const { stdout, stderr } = await this.exec(command)
-            console.log('debug-post', { command, stdout: stdout.trim(), stderr })
+            const { stdout } = await this.exec(command)
             return { result: stdout ? stdout.trim() : '' }
         } catch(error) {
             console.warn(error)
