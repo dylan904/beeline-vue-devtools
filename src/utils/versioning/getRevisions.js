@@ -24,6 +24,7 @@ export default async function getRevisions(packageName, packageVersion) {
         revisions = await updateTrackingRepo()
     } catch (err) {
         await git.switchBranch(currentBranch)
+        await git.popStash()
         console.warn('Cant get revisions: ' + err)
         return {}
     }
