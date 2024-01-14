@@ -14,6 +14,8 @@ export default function appendViolations(targetViolations, srcViolations, pendin
     const vCopy = copy(newV)
     const targetViolation = targetViolations.find(v => v.id === vCopy.id)
 
+    console.log('check append', {targetViolation, newV, pendingViolations})
+
     if (targetViolation) {
       const newNodes = vCopy.nodes.filter(nv => !targetViolation.nodes.find(ov => ov.target[0] === nv.target[0]))
 
@@ -38,6 +40,7 @@ export default function appendViolations(targetViolations, srcViolations, pendin
 
       if (pendingViolations) {
         const [unModifiedCompNodes, modifiedCompNodes] = partition(vCopy.nodes, filterModifiedComponents)
+        console.log({modifiedCompNodes, unModifiedCompNodes})
 
         if (unModifiedCompNodes.length) {
           const newVCopy = copy(newV)
