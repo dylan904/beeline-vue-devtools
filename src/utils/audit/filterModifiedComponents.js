@@ -14,6 +14,8 @@ export default async function filterModifiedComponents(newNode) {
   
   if (componentInstance.type.__file) {
     const componentFile = componentInstance.type.__file.replace(srcPathRegex, 'src/')
+
+    console.log('checkFileRevisions', {componentFile, check: process.env.revisions[componentFile], componentInfo})
     
     if (process.env.revisions[componentFile]) { // if file revised, store for later and check if pushed in recent commit
       componentInfo.commitHash = process.env.revisions[componentFile]
@@ -23,7 +25,7 @@ export default async function filterModifiedComponents(newNode) {
     else
       componentInfo.file = componentFile
 
-      console.log('checkFileRevisions', {componentFile, check: process.env.revisions[componentFile], componentInfo})
+      
   }
 
   newNode.component = componentInfo
