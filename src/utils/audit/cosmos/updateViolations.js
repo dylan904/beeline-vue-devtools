@@ -13,7 +13,7 @@ export default async function updateViolations(id, ops, modified=false) {
       resources.push(resource)
     }
 
-    console.log("updateVdone: Item patched successfully:", resource)
+    console.log("updateVdone: Item patched successfully:", resources)
     return resources
   } 
   catch (error) {
