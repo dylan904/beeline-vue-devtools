@@ -1,7 +1,7 @@
 import cooler from './cooler.js'
 import serialize from './serialize.js'
 import cosmos from './cosmos/index.js'
-import appendViolations from './appendViolations.js'
+import { appendViolations, appendAndProcessViolations } from './appendViolations.js'
 
 export default async function scan(router, violations, firstRun) {
   const currentRoute = router?.currentRoute.value
@@ -14,7 +14,7 @@ export default async function scan(router, violations, firstRun) {
 
   if (!result.violations.length)
     return
-  const { altered } = appendViolations(violations, result.violations)
+  const altered = appendViolations(violations, result.violations)
   if (altered) {
     if (!cosmos.getContainer()) {
       try {
@@ -39,7 +39,7 @@ export default async function scan(router, violations, firstRun) {
       }
       console.log({currentRecorded: recordedViolations.current, pendingRecorded: recordedViolations.pending, idc: qResult.current.id, idp: qResult.pending.id})
 
-      const { altered, ops } = appendViolations(recordedViolations.current, violations, recordedViolations.pending)
+      const { altered, ops } = appendAndProcessViolations(recordedViolations.current, violations, recordedViolations.pending)
       console.log({altered, ops})
 
       if (recordedViolations.current.length) {
