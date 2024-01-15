@@ -45,7 +45,7 @@ export function appendAndProcessViolations(currentViolations, srcViolations, pen
       currentViolation, pendingViolation, 
       currentViolations: JSON.parse(JSON.stringify(currentViolations)), 
       pendingViolations: JSON.parse(JSON.stringify(pendingViolations)), 
-      vCopy: JSON.parse(JSON.stringify(vCopy)), newCurrentNodes, newPendingNodes
+      vCopy: JSON.parse(JSON.stringify(vCopy)), newNodes
     })
 
     const [unModifiedCompNodes, modifiedCompNodes] = partition(newNodes, filterModifiedComponents)
