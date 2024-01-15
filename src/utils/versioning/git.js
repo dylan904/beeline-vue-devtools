@@ -41,7 +41,7 @@ class Git {
 
     async getUntrackedFiles() {
         const { result: rawUntrackedFiles } = await this.tryExec('git status --porcelain | grep "^??"')
-        const untrackedFiles = rawUntrackedFiles.split('??').map(file => file.trim())
+        const untrackedFiles = rawUntrackedFiles ? rawUntrackedFiles.split('??').map(file => file.trim()) : []
         return untrackedFiles
     }
 
