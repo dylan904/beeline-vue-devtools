@@ -39,8 +39,8 @@ export function appendAndProcessViolations(currentViolations, srcViolations, pen
     const newCurrentNodes = []
     const newPendingNodes = []
 
-    processViolation(currentViolation, vCopy, newCurrentNodes)
-    processViolation(pendingViolation, vCopy, newPendingNodes)
+    preProcessViolation(currentViolation, vCopy, newCurrentNodes)
+    preProcessViolation(pendingViolation, vCopy, newPendingNodes)
 
     console.log('appendandprocess 1', {currentViolation, pendingViolation, currentViolations, pendingViolations, vCopy})
 
@@ -50,25 +50,21 @@ export function appendAndProcessViolations(currentViolations, srcViolations, pen
 
       console.log('appendandprocess 2', {newNodes, unModifiedCompNodes, modifiedCompNodes})
 
-      if (newCurrentNodes.length) {
-        const currentAltered = appendViolation(newV, currentViolations, unModifiedCompNodes, ops.current, vi, false)
-        if (currentAltered) {
-          altered = true
-        }
+      const currentAltered = appendViolation(newV, currentViolations, unModifiedCompNodes, ops.current, vi, false)
+      if (currentAltered) {
+        altered = true
       }
 
-      if (newPendingNodes.length) {
-        const pendingAltered = appendViolation(newV, pendingViolations, modifiedCompNodes, ops.pending, vi, true)
-        if (pendingAltered) {
-          altered = true
-        }
+      const pendingAltered = appendViolation(newV, pendingViolations, modifiedCompNodes, ops.pending, vi, true)
+      if (pendingAltered) {
+        altered = true
       }
     }
   }
   return { altered, ops }
 }
 
-function processViolation(violation, vCopy, newNodes) {
+function preProcessViolation(violation, vCopy, newNodes) {
   if (violation) {
     const filteredNodes = vCopy.nodes.filter(nv => !violation.nodes.find(ov => ov.target[0] === nv.target[0]))
     newNodes.push(...filteredNodes)
