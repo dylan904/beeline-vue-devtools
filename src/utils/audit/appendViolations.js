@@ -44,21 +44,19 @@ export function appendAndProcessViolations(currentViolations, srcViolations, pen
 
     console.log('appendandprocess 1', {currentViolation, pendingViolation, currentViolations, pendingViolations, vCopy})
 
-    if (newCurrentNodes.length || newPendingNodes.length) {
-      const newNodes = newCurrentNodes.concat(newPendingNodes)
-      const [unModifiedCompNodes, modifiedCompNodes] = partition(newNodes, filterModifiedComponents)
+    const newNodes = newCurrentNodes.concat(newPendingNodes)
+    const [unModifiedCompNodes, modifiedCompNodes] = partition(newNodes, filterModifiedComponents)
 
-      console.log('appendandprocess 2', {newNodes, unModifiedCompNodes, modifiedCompNodes})
+    console.log('appendandprocess 2', {newNodes, unModifiedCompNodes, modifiedCompNodes})
 
-      const currentAltered = appendViolation(newV, currentViolations, unModifiedCompNodes, ops.current, vi, false)
-      if (currentAltered) {
-        altered = true
-      }
+    const currentAltered = appendViolation(newV, currentViolations, unModifiedCompNodes, ops.current, vi, false)
+    if (currentAltered) {
+      altered = true
+    }
 
-      const pendingAltered = appendViolation(newV, pendingViolations, modifiedCompNodes, ops.pending, vi, true)
-      if (pendingAltered) {
-        altered = true
-      }
+    const pendingAltered = appendViolation(newV, pendingViolations, modifiedCompNodes, ops.pending, vi, true)
+    if (pendingAltered) {
+      altered = true
     }
   }
   return { altered, ops }
