@@ -1,8 +1,9 @@
 import getClosestComponentInstance from '../devtools/getClosestComponentInstance.js'
 
 const srcPathRegex = /.*\/src\//
+const extractFileRegex = /\.[^/.]+$/
 
-export default async function filterModifiedComponents(newNode) {
+export default function filterModifiedComponents(newNode) {
   let match = true
   const componentInstance = getClosestComponentInstance(newNode.target[0])
   const componentInfo = {
@@ -16,7 +17,7 @@ export default async function filterModifiedComponents(newNode) {
     const componentFile = componentInstance.type.__file.replace(srcPathRegex, 'src/')
     if (!componentInfo.name) {
       const url = new URL(componentFile, window.location.origin);
-      const filenameWithoutExtension = url.pathname.split('/').pop().replace(/\.[^/.]+$/, '')
+      const filenameWithoutExtension = url.pathname.split('/').pop().replace(extractFileRegex, '')
       componentInfo.name = filenameWithoutExtension
     }
 
