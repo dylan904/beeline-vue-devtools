@@ -1,5 +1,4 @@
 import getClosestComponentInstance from '../devtools/getClosestComponentInstance.js'
-import { parse } from 'path'
 
 const srcPathRegex = /.*\/src\//
 
@@ -16,7 +15,9 @@ export default async function filterModifiedComponents(newNode) {
   if (componentInstance.type.__file) {
     const componentFile = componentInstance.type.__file.replace(srcPathRegex, 'src/')
     if (!componentInfo.name) {
-      componentInfo.name = parse(componentFile).name
+      const url = new URL(componentFile, window.location.origin);
+      const filenameWithoutExtension = url.pathname.split('/').pop().replace(/\.[^/.]+$/, '')
+      componentInfo.name = filenameWithoutExtension
     }
 
     console.log('checkFileRevisions1', {componentFile, check: process.env.revisions[componentFile], componentInfo})
