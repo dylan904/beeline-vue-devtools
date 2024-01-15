@@ -42,7 +42,12 @@ export function appendAndProcessViolations(currentViolations, srcViolations, pen
     preProcessViolation(currentViolation, vCopy, newCurrentNodes)
     preProcessViolation(pendingViolation, vCopy, newPendingNodes)
 
-    console.log('appendandprocess 1', {currentViolation, pendingViolation, currentViolations, pendingViolations, vCopy})
+    console.log('appendandprocess 1', {
+      currentViolation, pendingViolation, 
+      currentViolations: JSON.parse(JSON.stringify(currentViolations)), 
+      pendingViolations: JSON.parse(JSON.stringify(pendingViolations)), 
+      vCopy: JSON.parse(JSON.stringify(vCopy)), newCurrentNodes, newPendingNodes
+    })
 
     const newNodes = newCurrentNodes.concat(newPendingNodes)
     const [unModifiedCompNodes, modifiedCompNodes] = partition(newNodes, filterModifiedComponents)
