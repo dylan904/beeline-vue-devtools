@@ -75,7 +75,7 @@ function filterOutRoot(node) {
 }
 
 function appendViolation(newV, violations, compNodes, ops, vi, isPending) {
-  altered = false
+  let altered = false
   const newVCopy = copy(newV)
   const existingViolation = violations.find(v => v.id === newVCopy.id)
   newVCopy.nodes = compNodes.filter(filterOutRoot)
