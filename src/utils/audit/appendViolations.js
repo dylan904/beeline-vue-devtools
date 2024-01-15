@@ -68,6 +68,9 @@ function preProcessViolation(violation, vCopy, newNodes) {
     newNodes.push(...filteredNodes)
     violation.nodes.push(...filteredNodes)
   }
+  else {
+    newNodes.push(...vCopy.nodes)
+  }
 }
 
 function filterOutRoot(node) {
