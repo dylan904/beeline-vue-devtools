@@ -36,11 +36,10 @@ export function appendAndProcessViolations(currentViolations, srcViolations, pen
     const vCopy = copy(newV)
     const currentViolation = currentViolations.find(v => v.id === vCopy.id)
     const pendingViolation = pendingViolations.find(v => v.id === vCopy.id)
-    const newCurrentNodes = []
-    const newPendingNodes = []
+    const newNodes = []
 
-    preProcessViolation(currentViolation, vCopy, newCurrentNodes)
-    preProcessViolation(pendingViolation, vCopy, newPendingNodes)
+    preProcessViolation(currentViolation, vCopy, newNodes)
+    preProcessViolation(pendingViolation, vCopy, newNodes)
 
     console.log('appendandprocess 1', {
       currentViolation, pendingViolation, 
@@ -49,7 +48,6 @@ export function appendAndProcessViolations(currentViolations, srcViolations, pen
       vCopy: JSON.parse(JSON.stringify(vCopy)), newCurrentNodes, newPendingNodes
     })
 
-    const newNodes = newCurrentNodes.concat(newPendingNodes)
     const [unModifiedCompNodes, modifiedCompNodes] = partition(newNodes, filterModifiedComponents)
 
     console.log('appendandprocess 2', {newNodes, unModifiedCompNodes, modifiedCompNodes})
@@ -73,7 +71,7 @@ function preProcessViolation(violation, vCopy, newNodes) {
     newNodes.push(...filteredNodes)
     violation.nodes.push(...filteredNodes)
   }
-  else {
+  else if (!newNodes.length) {
     newNodes.push(...vCopy.nodes)
   }
 }
