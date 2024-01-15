@@ -25,7 +25,7 @@ export function appendViolations(targetViolations, srcViolations) {
   return altered
 }
 
-export function appendAndProcessViolations(targetViolations, srcViolations, pendingViolations) {
+export function appendAndProcessViolations(currentViolations, srcViolations, pendingViolations) {
   let altered = false
   const ops = {
     current: [],
@@ -34,20 +34,24 @@ export function appendAndProcessViolations(targetViolations, srcViolations, pend
 
   for (const [vi, newV] of srcViolations.entries()) {
     const vCopy = copy(newV)
-    const targetCurrentViolation = targetViolations.find(v => v.id === vCopy.id)
-    const targetPendingViolation = pendingViolations.find(v => v.id === vCopy.id)
+    const currentViolation = currentViolations.find(v => v.id === vCopy.id)
+    const pendingViolation = pendingViolations.find(v => v.id === vCopy.id)
     const newCurrentNodes = []
     const newPendingNodes = []
 
-    processViolation(targetCurrentViolation, vCopy, newCurrentNodes)
-    processViolation(targetPendingViolation, vCopy, newPendingNodes)
+    processViolation(currentViolation, vCopy, newCurrentNodes)
+    processViolation(pendingViolation, vCopy, newPendingNodes)
+
+    console.log('appendandprocess 1', {currentViolation, pendingViolation, currentViolations, pendingViolations, vCopy})
 
     if (newCurrentNodes.length || newPendingNodes.length) {
       const newNodes = newCurrentNodes.concat(newPendingNodes)
       const [unModifiedCompNodes, modifiedCompNodes] = partition(newNodes, filterModifiedComponents)
 
+      console.log('appendandprocess 2', {newNodes, unModifiedCompNodes, modifiedCompNodes})
+
       if (newCurrentNodes.length) {
-        const currentAltered = appendViolation(newV, targetViolations, unModifiedCompNodes, ops.current, vi, false)
+        const currentAltered = appendViolation(newV, currentViolations, unModifiedCompNodes, ops.current, vi, false)
         if (currentAltered) {
           altered = true
         }
