@@ -15,6 +15,7 @@ export default async function scan(router, violations, firstRun) {
   if (!result.violations.length)
     return
   const altered = appendViolations(violations, result.violations)
+  console.log('mycheck', {altered, violations, 'result.violations': result.violations })
   if (altered) {
     if (!cosmos.getContainer()) {
       try {
