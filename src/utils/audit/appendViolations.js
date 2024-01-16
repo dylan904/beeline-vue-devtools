@@ -6,7 +6,7 @@ import vOps from "../versioning/violationOps.js"
 export function appendViolations(targetViolations, srcViolations) {
   let altered = false
 
-  for (const [vi, newV] of srcViolations.entries()) {
+  for (const newV of srcViolations.entries()) {
     const vCopy = copy(newV)
     const targetViolation = targetViolations.find(v => v.id === vCopy.id)
 
@@ -26,7 +26,6 @@ export function appendViolations(targetViolations, srcViolations) {
 }
 
 export function appendAndProcessViolations(currentViolations, srcViolations, pendingViolations) {
-  let altered = false
   const ops = {
     current: [],
     pending: []
@@ -52,21 +51,15 @@ export function appendAndProcessViolations(currentViolations, srcViolations, pen
 
     console.log('appendandprocess 2', {newNodes, unModifiedCompNodes, modifiedCompNodes})
 
-    const currentAltered = appendViolation(newV, currentViolations, unModifiedCompNodes, ops.current, vi, false)
-    if (currentAltered) {
-      altered = true
-    }
-
-    const pendingAltered = appendViolation(newV, pendingViolations, modifiedCompNodes, ops.pending, vi, true)
-    if (pendingAltered) {
-      altered = true
-    }
+    appendViolation(newV, currentViolations, unModifiedCompNodes, ops.current, vi, false)
+    appendViolation(newV, pendingViolations, modifiedCompNodes, ops.pending, vi, true)
   }
-  return { altered, ops }
+  return { altered: ops.length, ops }
 }
 
 function preProcessViolation(violation, vCopy, newNodes) {
   if (violation) {
+    console.log('preprocess', {violation, 'vCopy.nodes.target': vCopy.nodes.map(item => item.target[0]), 'violation.nodes.target': violation.nodes.map(item => item.target[0]) })
     const filteredNodes = vCopy.nodes.filter(nv => !violation.nodes.find(ov => ov.target[0] === nv.target[0]))
     newNodes.push(...filteredNodes)
     violation.nodes.push(...filteredNodes)
@@ -81,7 +74,6 @@ function filterOutRoot(node) {
 }
 
 function appendViolation(newV, violations, compNodes, ops, vi, isPending) {
-  let altered = false
   const newVCopy = copy(newV)
   const existingViolation = violations.find(v => v.id === newVCopy.id)
   newVCopy.nodes = compNodes.filter(filterOutRoot)
@@ -92,14 +84,11 @@ function appendViolation(newV, violations, compNodes, ops, vi, isPending) {
     if (existingViolation) {
       for (const newNode of newVCopy.nodes) {
         ops.push(vOps.addNode(vi, newNode))
-        altered = true
       }
     }
     else {
       violations.push(newVCopy)
       ops.push(vOps.addViolation(newVCopy))
-      altered = true
     }
   }
-  return altered
 }
