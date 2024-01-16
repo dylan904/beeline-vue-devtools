@@ -34,15 +34,14 @@ export function appendAndProcessViolations(currentViolations, srcViolations, pen
 
   for (const [vi, newV] of srcViolations.entries()) {
     const vCopy = copy(newV)
+    const newNodes = []
     const currentViolation = currentViolations.find(v => v.id === vCopy.id)
     const pendingViolation = pendingViolations.find(v => v.id === vCopy.id)
-    const newNodes = []
 
-    preProcessViolation(currentViolation, vCopy, newNodes)
-    preProcessViolation(pendingViolation, vCopy, newNodes)
+    preProcessViolation(currentViolation, currentViolations, pendingViolations, vCopy, newNodes)
+    preProcessViolation(pendingViolation, currentViolations, pendingViolations, vCopy, newNodes)
 
     console.log('appendandprocess 1', {
-      currentViolation, pendingViolation, 
       currentViolations: JSON.parse(JSON.stringify(currentViolations)), 
       pendingViolations: JSON.parse(JSON.stringify(pendingViolations)), 
       vCopy: JSON.parse(JSON.stringify(vCopy)), newNodes
@@ -58,10 +57,10 @@ export function appendAndProcessViolations(currentViolations, srcViolations, pen
   return { altered: ops.length, ops }
 }
 
-function preProcessViolation(violation, vCopy, newNodes) {
+function preProcessViolation(violation, altViolation, vCopy, newNodes) {
   if (violation) {
-    console.log('preprocess', {violation, 'vCopy.nodes.target': vCopy.nodes.map(item => item.target[0]), 'violation.nodes.target': violation.nodes.map(item => item.target[0]) })
-    const filteredNodes = vCopy.nodes.filter(nv => !violation.nodes.find(ov => ov.target[0] === nv.target[0]))
+    const filteredNodes = vCopy.nodes.filter(nv => !violation.nodes.find(ov => ov.target[0] === nv.target[0]) && !altViolation.nodes.find(ov => ov.target[0] === nv.target[0]))
+    console.log('preprocess', {violation, filteredNodes, 'vCopy.nodes.target': vCopy.nodes.map(item => item.target[0]), 'violation.nodes.target': violation.nodes.map(item => item.target[0]) })
     newNodes.push(...filteredNodes)
     violation.nodes.push(...filteredNodes)
   }
