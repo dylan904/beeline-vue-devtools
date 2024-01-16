@@ -59,7 +59,10 @@ export function appendAndProcessViolations(currentViolations, srcViolations, pen
 
 function preProcessViolation(violation, altViolation, vCopy, newNodes) {
   if (violation) {
-    const filteredNodes = vCopy.nodes.filter(nv => !violation.nodes.find(ov => ov.target[0] === nv.target[0]) && !altViolation.nodes.find(ov => ov.target[0] === nv.target[0]))
+    const filteredNodes = vCopy.nodes.filter(nv => 
+      !violation.nodes.find(ov => ov.target[0] === nv.target[0]) && 
+      (!altViolation || !altViolation.nodes.find(ov => ov.target[0] === nv.target[0]))
+    )
     console.log('preprocess', {violation, filteredNodes, 'vCopy.nodes.target': vCopy.nodes.map(item => item.target[0]), 'violation.nodes.target': violation.nodes.map(item => item.target[0]) })
     newNodes.push(...filteredNodes)
     violation.nodes.push(...filteredNodes)
