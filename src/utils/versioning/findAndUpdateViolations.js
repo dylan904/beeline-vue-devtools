@@ -2,7 +2,7 @@ import cosmos from '../audit/cosmos/index.js'
 import getCosmosViolationOps from './getCosmosViolationOps.js'
 import joinArraysByProp from '../general/joinArraysByProp.js'
 
-export default async function findAndUpdatePendingOps() {
+export default async function findAndUpdateViolations() {
   const currentOps = []
   const pendingOps = []
   
@@ -21,7 +21,7 @@ export default async function findAndUpdatePendingOps() {
     const opsFromCurrent = await getCosmosViolationOps(currentViolations, pendingViolations, false)
 
     pendingOps.push( ...opsFromPending.pending, ...opsFromCurrent.pending )
-    currentOps.push( ...opsFromPending.current, ...opsFromCurrent.pending )
+    currentOps.push( ...opsFromPending.current, ...opsFromCurrent.current )
   }
   console.log({syncedPageViolationSet})
   console.log({pendingOps, currentOps})

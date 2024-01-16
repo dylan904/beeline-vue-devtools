@@ -1,7 +1,7 @@
 import cosmos from '../audit/cosmos/index.js' // singleton
 import git from './git.js'
 import updateTrackingRepo from './updateTrackingRepo.js'
-import findAndUpdatePendingOps from './findAndUpdatePendingOps.js'
+import findAndUpdateViolations from './findAndUpdateViolations.js'
 
 const a11yBranch = 'a11y-file-tracking'
 
@@ -32,6 +32,6 @@ export default async function getRevisions(packageName, packageVersion) {
     await git.switchBranch(currentBranch)    // return to previous branch
     await git.popStash()
 
-    setTimeout(() => findAndUpdatePendingOps) // call in new thread
+    setTimeout(() => findAndUpdateViolations) // call in new thread
     return revisions
 }
