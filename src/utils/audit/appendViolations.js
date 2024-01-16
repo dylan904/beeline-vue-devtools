@@ -55,7 +55,7 @@ export function appendAndProcessViolations(currentViolations, srcViolations, pen
       pending: modifiedCompNodes
     }
 
-    console.log('appendandprocess 2', {newNodes, unModifiedCompNodes, modifiedCompNodes})
+    console.log('appendandprocess 2', {unModifiedCompNodes, modifiedCompNodes})
 
     appendViolation(newV, violations, existingViolation, compNodes, ops, 'current')
     appendViolation(newV, violations, existingViolation, compNodes, ops, 'pending')
