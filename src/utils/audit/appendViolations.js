@@ -38,8 +38,8 @@ export function appendAndProcessViolations(currentViolations, srcViolations, pen
     const currentViolation = currentViolations.find(v => v.id === vCopy.id)
     const pendingViolation = pendingViolations.find(v => v.id === vCopy.id)
 
-    preProcessViolation(currentViolation, currentViolations, pendingViolations, vCopy, newNodes)
-    preProcessViolation(pendingViolation, currentViolations, pendingViolations, vCopy, newNodes)
+    preProcessViolation(currentViolation, pendingViolation, vCopy, newNodes)
+    preProcessViolation(pendingViolation, currentViolation, vCopy, newNodes)
 
     console.log('appendandprocess 1', {
       currentViolations: JSON.parse(JSON.stringify(currentViolations)), 
