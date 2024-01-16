@@ -9,7 +9,7 @@ export function appendViolations(targetViolations, srcViolations) {
   for (const newV of srcViolations.entries()) {
     const vCopy = copy(newV)
     const targetViolation = targetViolations.find(v => v.id === vCopy.id)
-    console.log('appendViolation', {vCopy, targetViolation})
+    console.log('appendViolation', {vCopy, targetViolation, targetViolations})
 
     if (targetViolation) {
       const newNodes = vCopy.nodes.filter(nv => !targetViolation.nodes.find(ov => ov.target[0] === nv.target[0]))
