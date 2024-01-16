@@ -52,8 +52,8 @@ export function appendAndProcessViolations(currentViolations, srcViolations, pen
 
     console.log('appendandprocess 2', {newNodes, unModifiedCompNodes, modifiedCompNodes})
 
-    appendViolation(newV, currentViolations, unModifiedCompNodes, ops.current, vi, false)
-    appendViolation(newV, pendingViolations, modifiedCompNodes, ops.pending, vi, true)
+    appendViolation(newV, currentViolations, unModifiedCompNodes, ops.current)
+    appendViolation(newV, pendingViolations, modifiedCompNodes, ops.pending)
   }
   return { altered: ops.length, ops }
 }
@@ -74,9 +74,10 @@ function filterOutRoot(node) {
   return node.component?.name !== 'ROOT'
 }
 
-function appendViolation(newV, violations, compNodes, ops, vi, isPending) {
+function appendViolation(newV, violations, compNodes, ops) {
   const newVCopy = copy(newV)
-  const existingViolation = violations.find(v => v.id === newVCopy.id)
+  const evi = violations.findIndex(v => v.id === newVCopy.id) // existing violation index
+  const existingViolation = violations[evi]
   newVCopy.nodes = compNodes.filter(filterOutRoot)
 
   console.log('appendPending', {existingViolation, newVCopy, compNodes})
@@ -84,7 +85,7 @@ function appendViolation(newV, violations, compNodes, ops, vi, isPending) {
   if (newVCopy.nodes.length) {
     if (existingViolation) {
       for (const newNode of newVCopy.nodes) {
-        ops.push(vOps.addNode(vi, newNode))
+        ops.push(vOps.addNode(evi, newNode))
       }
     }
     else {
