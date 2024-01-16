@@ -6,7 +6,7 @@ import vOps from "../versioning/violationOps.js"
 export function appendViolations(targetViolations, srcViolations) {
   let altered = false
 
-  for (const newV of srcViolations.entries()) {
+  for (const newV of srcViolations) {
     const vCopy = copy(newV)
     const targetViolation = targetViolations.find(v => v.id === vCopy.id)
     console.log('appendViolation', {vCopy, targetViolation, targetViolations})
