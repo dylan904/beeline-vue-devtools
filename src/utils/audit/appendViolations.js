@@ -31,67 +31,70 @@ export function appendAndProcessViolations(currentViolations, srcViolations, pen
     current: [],
     pending: []
   }
+  const violations = {
+    current: currentViolations,
+    pending: pendingViolations
+  }
 
-  for (const [vi, newV] of srcViolations.entries()) {
+  for (const newV of srcViolations) {
     const vCopy = copy(newV)
-    const newNodes = []
-    const currentViolation = currentViolations.find(v => v.id === vCopy.id)
-    const pendingViolation = pendingViolations.find(v => v.id === vCopy.id)
-
-    preProcessViolation(currentViolation, pendingViolation, vCopy, newNodes)
-    preProcessViolation(pendingViolation, currentViolation, vCopy, newNodes)
+    const existingViolation = {
+      current: currentViolations.find(v => v.id === vCopy.id),
+      pending: pendingViolations.find(v => v.id === vCopy.id)
+    }
 
     console.log('appendandprocess 1', {
-      currentViolations: JSON.parse(JSON.stringify(currentViolations)), 
-      pendingViolations: JSON.parse(JSON.stringify(pendingViolations)), 
-      vCopy: JSON.parse(JSON.stringify(vCopy)), newNodes
+      currentViolations: JSON.parse(JSON.stringify(violations.current)), 
+      pendingViolations: JSON.parse(JSON.stringify(violations.pending)), 
+      vCopy: JSON.parse(JSON.stringify(vCopy))
     })
 
-    const [unModifiedCompNodes, modifiedCompNodes] = partition(newNodes, filterModifiedComponents)
+    const [unModifiedCompNodes, modifiedCompNodes] = partition(newV.nodes, filterModifiedComponents)
+    const compNodes = {
+      current: unModifiedCompNodes,
+      pending: modifiedCompNodes
+    }
 
     console.log('appendandprocess 2', {newNodes, unModifiedCompNodes, modifiedCompNodes})
 
-    appendViolation(newV, currentViolations, unModifiedCompNodes, ops.current)
-    appendViolation(newV, pendingViolations, modifiedCompNodes, ops.pending)
+    appendViolation(newV, violations, existingViolation, compNodes, ops, 'current')
+    appendViolation(newV, violations, existingViolation, compNodes, ops, 'pending')
   }
   return { altered: ops.length, ops }
-}
-
-function preProcessViolation(violation, altViolation, vCopy, newNodes) {
-  if (violation) {
-    const filteredNodes = vCopy.nodes.filter(nv => 
-      !violation.nodes.find(ov => ov.target[0] === nv.target[0]) && 
-      (!altViolation || !altViolation.nodes.find(ov => ov.target[0] === nv.target[0]))
-    )
-    console.log('preprocess', {violation, filteredNodes, 'vCopy.nodes.target': vCopy.nodes.map(item => item.target[0]), 'violation.nodes.target': violation.nodes.map(item => item.target[0]) })
-    newNodes.push(...filteredNodes)
-    violation.nodes.push(...filteredNodes)
-  }
-  else if (!newNodes.length) {
-    newNodes.push(...vCopy.nodes)
-  }
 }
 
 function filterOutRoot(node) {
   return node.component?.name !== 'ROOT'
 }
 
-function appendViolation(newV, violations, compNodes, ops) {
+function appendViolation(newV, violations, existingViolation, compNodes, ops, type) {
+  const isCurrent = type === 'current'
+  const isPending = type === 'pending'
+  
   const newVCopy = copy(newV)
-  const evi = violations.findIndex(v => v.id === newVCopy.id) // existing violation index
-  const existingViolation = violations[evi]
-  newVCopy.nodes = compNodes.filter(filterOutRoot)
+  newVCopy.nodes = compNodes[type].filter(filterOutRoot)
 
   console.log('appendPending', {existingViolation, newVCopy, compNodes})
 
   if (newVCopy.nodes.length) {
-    if (existingViolation) {
-      for (const newNode of newVCopy.nodes) {
-        ops.push(vOps.addNode(evi, newNode))
+    const existingV = existingViolation[type]
+    if (existingV) {
+      for (const node of newVCopy.nodes) {
+        const commitHash = node.component?.commitHash
+        const existingNodeIdx = existingV.nodes.findIndex(n => n.target[0] === node.target[0])
+        const existingNode = existingV.nodes[existingNodeIdx]
+        const evi = violations[type].findIndex(v => v.id === newVCopy.id)
+
+        if ((isCurrent && existingNode && commitHash) || (isPending && existingNode && !commitHash)) {
+          ops[type].push(vOps.removeNode(evi, existingNodeIdx))
+        }
+        else if ((isCurrent && !existingNode && !commitHash) || (isPending && !existingNode && commitHash)) {
+          ops[type].push(vOps.addNode(evi, newNode))
+        }
       }
     }
     else {
-      violations.push(newVCopy)
+      violations[type].push(newVCopy)
       ops.push(vOps.addViolation(newVCopy))
     }
   }
