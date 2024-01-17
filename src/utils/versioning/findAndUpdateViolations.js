@@ -3,6 +3,7 @@ import getCosmosViolationOps from './getCosmosViolationOps.js'
 import joinArraysByProp from '../general/joinArraysByProp.js'
 
 export default async function findAndUpdateViolations() {
+  console.log('findAndUpdate')
   const currentOps = []
   const pendingOps = []
   

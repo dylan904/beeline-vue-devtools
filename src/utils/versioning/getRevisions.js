@@ -32,6 +32,7 @@ export default async function getRevisions(packageName, packageVersion) {
     await git.switchBranch(currentBranch)    // return to previous branch
     await git.popStash()
 
+    console.log('wait findAndUpdateViolations()')
     setTimeout(() => findAndUpdateViolations) // call in new thread
     return revisions
 }
