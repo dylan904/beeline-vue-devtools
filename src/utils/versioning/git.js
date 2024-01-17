@@ -70,6 +70,7 @@ class Git {
     }
 
     async commitFiles(filePaths, message="File tracking commit", flags=[], ignoreUntracked=false) {
+        console.log('commitFiles', filePaths)
         if (filePaths.length) {
             const fileString = filePaths.map(file => '"' + file + '"').join(' ')
             await this.add(fileString)
