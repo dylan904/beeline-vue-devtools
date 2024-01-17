@@ -33,6 +33,6 @@ export default async function getRevisions(packageName, packageVersion) {
     await git.popStash()
 
     console.log('wait findAndUpdateViolations()')
-    setTimeout(() => findAndUpdateViolations) // call in new thread
+    setTimeout(findAndUpdateViolations) // call in new thread
     return revisions
 }
