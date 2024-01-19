@@ -65,7 +65,3 @@ export function appendAndProcessViolations(currentViolations, srcViolations, pen
     ops 
   }
 }
-
-function filterOutRoot(node) {
-  return node.component?.name !== 'ROOT'
-}

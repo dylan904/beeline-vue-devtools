@@ -40,3 +40,6 @@ export default async function syncViolations(srcV, srcVIdx, destViolations, isPe
     }
 }
   
+function filterOutRoot(node) {
+    return node.component?.name !== 'ROOT'
+}
