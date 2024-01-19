@@ -1,4 +1,4 @@
-import fromDir from "./fromDir.js"
+import fromDir from "../general/fromDir.js"
 
 export default function getComponentFiles() {
     const componentFiles = []
