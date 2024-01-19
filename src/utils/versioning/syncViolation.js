@@ -18,7 +18,7 @@ export default async function syncViolations(srcV, srcVIdx, destViolations, isPe
             const component = node.component
 
             if (component?.file && component?.commitHash) {
-                const shouldUpdate = updateNodeCheck(component)
+                const shouldUpdate = await updateNodeCheck(component)
                 const adjustedNodeIdx = nodeCount - 1 - nIdx
                 const destNode = destV.nodes.find(n => n.target[0] === node.target[0])
                 
