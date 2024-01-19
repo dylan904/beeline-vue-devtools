@@ -1,7 +1,7 @@
 import filterModifiedComponents from "./filterModifiedComponents.js"
 import partition from "lodash/partition"
 import copy from "../copy.js"
-import vOps from "../versioning/violationOps.js"
+import syncViolation from "../versioning/syncViolation.js"
 
 export function appendViolations(targetViolations, srcViolations) {
   let altered = false
@@ -36,17 +36,10 @@ export function appendAndProcessViolations(currentViolations, srcViolations, pen
     pending: pendingViolations
   }
 
-  for (const newV of srcViolations) {
-    const vCopy = copy(newV)
-    const existingViolation = {
-      current: currentViolations.find(v => v.id === vCopy.id),
-      pending: pendingViolations.find(v => v.id === vCopy.id)
-    }
-
+  for (const [srcVIdx, newV] of srcViolations.entries()) {
     console.log('appendandprocess 1', {
-      currentViolations: JSON.parse(JSON.stringify(violations.current)), 
-      pendingViolations: JSON.parse(JSON.stringify(violations.pending)), 
-      vCopy: JSON.parse(JSON.stringify(vCopy))
+      violations: copy(violations), 
+      newV: copy(newV)
     })
 
     const [unModifiedCompNodes, modifiedCompNodes] = partition(newV.nodes, filterModifiedComponents)
@@ -54,11 +47,18 @@ export function appendAndProcessViolations(currentViolations, srcViolations, pen
       current: unModifiedCompNodes,
       pending: modifiedCompNodes
     }
+    const newVCopy = copy(newV)
 
     console.log('appendandprocess 2', {unModifiedCompNodes, modifiedCompNodes})
 
-    appendViolation(newV, violations, existingViolation, compNodes, ops, 'current')
-    appendViolation(newV, violations, existingViolation, compNodes, ops, 'pending')
+    for (const type of ['current', 'pending']) {
+      newVCopy.nodes = compNodes[type]
+      const isPending = type === 'pending'
+    
+      syncViolation(newVCopy, srcVIdx, violations[type], isPending, ops, (component) => !!component.commitHash)
+    
+      console.log('appendPending', {newVCopy, compNodes})
+    }
   }
   return { 
     altered: !!(ops.current.length + ops.pending.length), 
@@ -68,37 +68,4 @@ export function appendAndProcessViolations(currentViolations, srcViolations, pen
 
 function filterOutRoot(node) {
   return node.component?.name !== 'ROOT'
-}
-
-function appendViolation(newV, violations, existingViolation, compNodes, ops, type) {
-  const isCurrent = type === 'current'
-  const isPending = type === 'pending'
-  
-  const newVCopy = copy(newV)
-  newVCopy.nodes = compNodes[type].filter(filterOutRoot)
-
-  console.log('appendPending', {existingViolation, newVCopy, compNodes})
-
-  if (newVCopy.nodes.length) {
-    const existingV = existingViolation[type]
-    if (existingV) {
-      for (const node of newVCopy.nodes) {
-        const revised = !!node.component?.commitHash
-        const existingNodeIdx = existingV.nodes.findIndex(n => n.target[0] === node.target[0])
-        const existingNode = existingV.nodes[existingNodeIdx]
-        const evi = violations[type].findIndex(v => v.id === newVCopy.id)
-
-        if ((isCurrent && existingNode && revised) || (isPending && existingNode && !revised)) {
-          ops[type].push(vOps.removeNode(evi, existingNodeIdx))
-        }
-        else if ((isCurrent && !existingNode && !revised) || (isPending && !existingNode && revised)) {
-          ops[type].push(vOps.addNode(evi, node))
-        }
-      }
-    }
-    else {
-      violations[type].push(newVCopy)
-      ops[type].push(vOps.addViolation(newVCopy))
-    }
-  }
 }

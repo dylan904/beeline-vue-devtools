@@ -1,20 +1,25 @@
 class ViolationOps {
-  addViolation(value) {
-    return { 
-      op: "add", path: `/violations/-`, value
-    }
+  addViolation(ops, value) {
+    ops.push({ 
+      op: "add", 
+      path: `/violations/-`, 
+      value
+    })
   }
   
-  addNode(vIdx, value) {
-    return { 
+  addNode(ops, vIdx, value) {
+    ops.push({ 
       op: "add", 
       path: `/violations/${vIdx}/nodes/-`,
       value
-    }
+    })
   }
 
-  removeNode(vIdx, nIdx) {
-    return { op: "remove", path: `/violations/${vIdx}/nodes/${nIdx}` }
+  removeNode(ops, vIdx, nIdx) {
+    ops.push({ 
+      op: "remove", 
+      path: `/violations/${vIdx}/nodes/${nIdx}` 
+    })
   }
 }
 
