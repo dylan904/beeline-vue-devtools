@@ -1,4 +1,4 @@
-import vOps from "./violationOps"
+import vOps from "./violationOps.js"
 
 export default async function syncViolations(srcV, srcVIdx, destViolations, isPending, opsObj, updateNodeCheck) {
     if (!srcV.nodes.length)
