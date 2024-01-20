@@ -11,8 +11,7 @@ class Git {
             throw('Not a git repository (yet). Try running "git init"')
         }
         if (!(await this.hasRemoteOrigin())) {
-            //throw('There needs to be a remote origin')
-            console.warn('There needs to be a remote origin')
+            throw('There needs to be a remote origin')
         }
         else if (!(await this.hasCommits())) {
             await this.exec('git commit --allow-empty -n -m "Initial commit."')
@@ -40,7 +39,8 @@ class Git {
     }
 
     async getUntrackedFiles() {
-        const { result: rawUntrackedFiles } = await this.tryExec('git status --porcelain | grep "^??"')
+        const { error, result: rawUntrackedFiles } = await this.tryExec('git status --porcelain | grep "^??"')
+        console.log('getUntrackedFiles', { error, rawUntrackedFiles })
         const untrackedFiles = rawUntrackedFiles ? rawUntrackedFiles.split('??').map(file => file.trim()) : []
         return untrackedFiles
     }
@@ -139,8 +139,6 @@ class Git {
     async #setStoredStagedFiles() {
         const currentBranch = await this.getCurrentBranch()
         const { result: stagedResult } = await this.tryExec(`git diff --staged --name-only`)
-
-        //const stagedFiles = splitLines(stagedResult)
         const stagedFiles = splitLines(stagedResult)
         cache.set(`stagedFiles[${currentBranch}]`, stagedFiles)
     }
