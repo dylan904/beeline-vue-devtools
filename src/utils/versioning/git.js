@@ -41,10 +41,12 @@ class Git {
     }
 
     async getUntrackedFiles() {
-        const { error, result: rawUntrackedFiles } = await this.tryExec('git status --porcelain | grep "^??"')
-        console.log('getUntrackedFiles', { error, rawUntrackedFiles })
-        const untrackedFiles = rawUntrackedFiles ? rawUntrackedFiles.split('??').map(file => file.trim()) : []
-        return untrackedFiles
+        try {
+            const { stdout: rawUntrackedFiles } = await this.exec('git status --porcelain | grep "^??"')
+            return rawUntrackedFiles.split('??').map(file => file.trim())
+        } catch(cmdErr) {
+            return []
+        }
     }
 
     async hasRemoteOrigin() {
