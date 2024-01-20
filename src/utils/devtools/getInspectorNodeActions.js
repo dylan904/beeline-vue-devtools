@@ -1,5 +1,6 @@
 import { BridgeEvents } from '../consts.js'
 import { useBridge } from '../../features/bridge.js'
+import { inspectDOM } from '../inspectDOM.js'
 
 export default function getInspectorNodeActions(inspectorId, componentInstances) {
     return [
