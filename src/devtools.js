@@ -1,7 +1,7 @@
 import { ref, watch } from 'vue'
 import devtools from '@vue/devtools'
 import { setupDevtoolsPlugin } from '@vue/devtools-api'
-import auditA11Y from './utils/audit/auditA11Y.js'
+import auditA11y from './utils/audit/auditA11y.js'
 import getInspectorActions from './utils/devtools/getInspectorActions.js'
 import getInspectorNodeActions from './utils/devtools/getInspectorNodeActions.js'
 import createAxeScript from './utils/audit/createAxeScript.js'
@@ -29,7 +29,7 @@ export async function prepareA11YAudit(router) {
     script.onload = async () => {
         init = true
         watch(compEls, async els => {
-            await auditA11Y(els, router, violationsRef.value)
+            await auditA11y(els, router, violationsRef.value)
             if (devtoolsAPI)
                 devtoolsAPI.sendInspectorTree(inspectorId)
         })
@@ -37,7 +37,7 @@ export async function prepareA11YAudit(router) {
         watch(() => router.currentRoute.value,
             async newRoute => {
                 violationsRef.value = []
-                await auditA11Y(compEls.value, router, violationsRef.value)
+                await auditA11y(compEls.value, router, violationsRef.value)
                 if (devtoolsAPI)
                     devtoolsAPI.sendInspectorTree(inspectorId)
             }
