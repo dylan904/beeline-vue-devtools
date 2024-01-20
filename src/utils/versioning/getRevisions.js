@@ -11,7 +11,7 @@ export default async function getRevisions(packageName, packageVersion) {
             await cosmos.init(packageName, packageVersion)
         }
     } catch(err) {
-        console.warn(`Cant get revisions: ${err}`)
+        console.warn(`Cant get revisions (init): ${err}`)
         return {}
     }
 
@@ -23,7 +23,7 @@ export default async function getRevisions(packageName, packageVersion) {
     try {
         revisions = await updateTrackingRepo()
     } catch(err) {
-        console.warn(`Cant get revisions: ${err}`)
+        console.warn(`Cant get revisions (update): ${err}`)
         return {}
     } finally {
         await git.switchBranch(currentBranch)    // return to previous branch
