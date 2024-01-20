@@ -65,12 +65,14 @@ let git
 
 async function getUpdatedOps(srcViolations, violations, isPending) {
   const ops = { pending: [], current: [] }
-  if (typeof window === 'undefined' && !git)
+  if (typeof window === 'undefined' && !git) {
+    console.log('setgit')
     git = await import('../versioning/git.js')
+  }
 
   for (const [vIdx, violation] of srcViolations.entries()) {
     syncViolation(violation, vIdx, violations, isPending, ops, async (component) => {
-      console.log('trysetstate', {git, wintype: typeof window, component, state: fileDiffersStates[component.file], file: component.file})
+      console.log('trysetstate', {git, serverSide: typeof window === 'undefined', component, state: fileDiffersStates[component.file], file: component.file})
       if (!fileDiffersStates.hasOwnProperty(component.file))
         fileDiffersStates[component.file] = await git.fileDiffersFromCommit(component.file, component.commitHash)
 
