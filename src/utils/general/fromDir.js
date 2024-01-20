@@ -5,8 +5,9 @@ export default async function fromDir(startPath, filter) {
     let results = [];
 
     async function helper(dir) {
+        console.log({dir})
         const files = await fs.promises.readdir(dir)
-        console.log({dir, files})
+        console.log({files})
         for (let file of files) {
             const filePath = path.join(dir, file)
             const isDirectory = (await fs.promises.stat(filePath)).isDirectory()
@@ -18,6 +19,11 @@ export default async function fromDir(startPath, filter) {
         }
     }
 
-    await helper(startPath)
+    try {
+        await helper(startPath)
+    } catch(err) {
+        console.log('fromDir() error: ', err)
+    }
+    
     return results
 }
