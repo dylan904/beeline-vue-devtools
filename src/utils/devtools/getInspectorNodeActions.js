@@ -1,8 +1,9 @@
 import { BridgeEvents } from '../consts.js'
 import { useBridge } from '../../features/bridge.js'
 import inspectDOM from './inspectDOM.js'
+import openInEditor from './openInEditor.js'
 
-export default function getInspectorNodeActions(inspectorId, componentInstances) {
+export default function getInspectorNodeActions(api, inspectorId, componentInstances) {
     return [
         {
             icon: 'help',

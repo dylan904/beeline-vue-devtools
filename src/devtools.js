@@ -76,7 +76,7 @@ export const DevtoolsPlugin = {
                 treeFilterPlaceholder: 'Search for test...',
                 noSelectionText: 'Select a node to view details',
                 actions: getInspectorActions(),
-                nodeActions: getInspectorNodeActions(inspectorId, componentInstances)
+                nodeActions: getInspectorNodeActions(api, inspectorId, componentInstances)
             })
         })
     }
