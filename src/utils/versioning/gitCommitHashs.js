@@ -10,11 +10,9 @@ export default async function gitCommitHashs(filePaths) {
     }
 
     const hasModifiedChanges = await git.fileHasChanges(filePath)
-    if (hasModifiedChanges) {
-      return await git.getFileCommitHash(filePath)
-    }
     const hasStagedChanges = await git.fileHasChanges(filePath, true)
-    if (hasStagedChanges) {
+
+    if (hasModifiedChanges || hasStagedChanges) {
       return await git.getFileCommitHash(filePath)
     }
   }

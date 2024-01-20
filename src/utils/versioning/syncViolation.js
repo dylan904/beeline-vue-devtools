@@ -2,7 +2,7 @@ import vOps from "./violationOps.js"
 
 export default async function syncViolation(srcV, srcVIdx, destViolations, isPending, opsObj, updateNodeCheck) {
     if (!srcV.nodes.length)
-      return
+        return
   
     const type = isPending ? 'pending' : 'current'
     const ops = opsObj[type]
@@ -15,15 +15,15 @@ export default async function syncViolation(srcV, srcVIdx, destViolations, isPen
         const nodeCount = srcV.nodes.length
   
         for (const [nIdx, node] of targetNodes.entries()) {
-            const component = node.component
+            const component = node.component || {}
 
-            if (component?.file && component?.commitHash) {
+            if (component.file && component.commitHash) {
                 const shouldUpdate = await updateNodeCheck(component)
                 const adjustedNodeIdx = nodeCount - 1 - nIdx
                 const destNode = destV.nodes.find(n => n.target[0] === node.target[0])
                 
                 console.log('shouldUpdate?', {hasDestNode: !!destNode, isCurrent, shouldUpdate})
-        
+
                 if (destNode) {
                     if ((isCurrent && shouldUpdate) || (isPending && !shouldUpdate)) {
                         vOps.removeNode(ops, srcVIdx, adjustedNodeIdx)
