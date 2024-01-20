@@ -8,6 +8,7 @@ const execPromise = promisify(exec)
 const srcPathRegex = /.*\/src\//
 
 export default async function updateTrackingRepo() { // commit modified files to secondary branch for version reference
+  console.log('updateTrackingRepo', process.env.projectRoot)
   const componentFiles = await fromDir(process.env.projectRoot + '/src/', /\.vue$/)
   console.log({componentFiles})
   const revisions = {}
