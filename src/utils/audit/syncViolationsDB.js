@@ -67,7 +67,7 @@ async function getUpdatedOps(srcViolations, violations, isPending) {
   const ops = { pending: [], current: [] }
   if (typeof window === 'undefined' && !git) {
     console.log('setgit')
-    git = await import('../versioning/git.js')
+    git = (await import('../versioning/git.js')).default
   }
 
   for (const [vIdx, violation] of srcViolations.entries()) {
