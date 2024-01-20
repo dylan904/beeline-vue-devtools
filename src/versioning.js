@@ -3,7 +3,7 @@ import { dirname } from 'path'
 import { loadEnv } from 'vite'
 import git from './utils/versioning/git.js'  // singleton
 import getRevisions from './utils/versioning/getRevisions.js'
-import getPackageJSON from './utils/versioning/getPackageJSON.js'
+import getPackageJSON from './utils/general/getPackageJSON.js'
 
 export async function getA11yConfig(importURL) {
   try {
