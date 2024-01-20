@@ -1,5 +1,4 @@
 import filterModifiedComponents from "./filterModifiedComponents.js"
-import partition from "lodash/partition"
 import copy from "../general/copy.js"
 import syncViolation from "../versioning/syncViolation.js"
 
@@ -42,14 +41,13 @@ export function appendAndProcessViolations(currentViolations, srcViolations, pen
       newV: copy(newV)
     })
 
-    const [unModifiedCompNodes, modifiedCompNodes] = partition(newV.nodes, filterModifiedComponents)
     const compNodes = {
-      current: unModifiedCompNodes,
-      pending: modifiedCompNodes
+      current: newV.nodes.filter(node => filterModifiedComponents(node)),
+      pending: newV.nodes.filter(node => !filterModifiedComponents(node))
     }
     const newVCopy = copy(newV)
 
-    console.log('appendandprocess 2', {unModifiedCompNodes, modifiedCompNodes})
+    console.log('appendandprocess 2', {compNodes})
 
     for (const type of ['current', 'pending']) {
       newVCopy.nodes = compNodes[type]
@@ -57,11 +55,13 @@ export function appendAndProcessViolations(currentViolations, srcViolations, pen
     
       syncViolation(newVCopy, srcVIdx, violations[type], isPending, ops, (component) => !!component.commitHash)
     
-      console.log('appendPending', {newVCopy, compNodes})
+      console.log('appendPending', {newVCopy})
     }
   }
+
+  const opCount = (ops.current.length + ops.pending.length)
   return { 
-    altered: !!(ops.current.length + ops.pending.length), 
-    ops 
+    altered: !!opCount, 
+    ops
   }
 }
