@@ -1,6 +1,7 @@
 import cosmos from './cosmos/index.js'
 import { appendAndProcessViolations } from './appendViolations.js'
 import syncViolation from '../versioning/syncViolation.js'
+import git from '../versioning/git.js'
 
 export default async function syncViolationsDB(violations, urlKey=null) {
   const currentQueryResults = await cosmos.queryViolations(urlKey, false)
