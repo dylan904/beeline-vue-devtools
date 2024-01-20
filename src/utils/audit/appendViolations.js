@@ -1,6 +1,6 @@
 import filterModifiedComponents from "./filterModifiedComponents.js"
 import partition from "lodash/partition"
-import copy from "../copy.js"
+import copy from "../general/copy.js"
 import syncViolation from "../versioning/syncViolation.js"
 
 export function appendViolations(targetViolations, srcViolations) {

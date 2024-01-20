@@ -1,3 +1,5 @@
+import copy from "../general/copy"
+
 const impacts = ['minor', 'moderate', 'serious', 'critical']
 const defaultImpactTally = Object.fromEntries(
     impacts.map(impact => [impact, 0])
@@ -82,8 +84,4 @@ export default class ViolationTally {
 
         return componentViolations
     }
-}
-
-function copy(data) {
-    return JSON.parse(JSON.stringify(data))
 }
