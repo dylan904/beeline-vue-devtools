@@ -66,7 +66,7 @@ let git
 async function getUpdatedOps(srcViolations, violations, isPending) {
   const ops = { pending: [], current: [] }
   if (typeof window === undefined && !git)
-    git = await import('../git.js')
+    git = await import('../versioning/git.js')
 
   for (const [vIdx, violation] of srcViolations.entries()) {
     syncViolation(violation, vIdx, violations, isPending, ops, async (component) => {
