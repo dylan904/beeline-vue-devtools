@@ -22,7 +22,7 @@ export default async function syncViolation(srcV, srcVIdx, destViolations, isPen
                 const adjustedNodeIdx = nodeCount - 1 - nIdx
                 const destNode = destV.nodes.find(n => n.target[0] === node.target[0])
                 
-                console.log('shouldUpdate?', {hasDestNode: !!destNode, isCurrent, shouldUpdate})
+                console.log('shouldUpdate?', {hasDestNode: !!destNode, isCurrent, shouldUpdate, component})
 
                 if (destNode) {
                     if ((isCurrent && shouldUpdate) || (isPending && !shouldUpdate)) {

@@ -5,6 +5,8 @@ import NodeCache from 'node-cache'
 const cache = new NodeCache()
 cache.flushAll()
 
+const commandLog = []
+
 class Git {
     async init() {  // optional
         if (!(await this.isRepo())) {
@@ -179,11 +181,13 @@ class Git {
     }
 
     async tryExec (command) {
+        commandLog.push(command)
         try {
             const { stdout } = await this.exec(command)
             return { result: stdout ? stdout.trim() : '' }
         } catch(error) {
             console.warn(error)
+            console.log({commandLog})
             return { error }
         }
     }
