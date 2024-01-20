@@ -1,5 +1,5 @@
-import { isChrome } from './utils/env.js'
-import { getBridge } from './features/bridge.js'
+import { isChrome } from '@utils/env'
+import { getBridge } from '@utils/devtools'
 
 export default function inspectDOM(id) {
     if (!id) return
