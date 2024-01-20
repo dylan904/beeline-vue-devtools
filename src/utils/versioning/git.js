@@ -41,6 +41,7 @@ class Git {
     }
 
     async getUntrackedFiles() {
+        commandLog.push('git status --porcelain | grep "^??"')
         try {
             const { stdout: rawUntrackedFiles } = await this.exec('git status --porcelain | grep "^??"')
             return rawUntrackedFiles.split('??').map(file => file.trim())
@@ -62,11 +63,12 @@ class Git {
     async commit(message="File tracking commit", flags=[], ignoreUntracked) {
         const args = [`-m "${message}"`, ...flags]
         try {
+            commandLog.push(`git commit ${ args.join(' ') }`)
             await this.exec(`git commit ${ args.join(' ') }`)
         } catch(commitErr) {
             if (ignoreUntracked) {
                 const untrackedFiles = await this.getUntrackedFiles()
-                console.log({ commitErr, untrackedFiles })
+                console.log({ commitErr, untrackedFiles, commandLog })
             }
         }
         const { result: commitHash } = await this.tryExec(`git rev-parse HEAD`)
