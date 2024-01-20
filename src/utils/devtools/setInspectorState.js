@@ -1,9 +1,8 @@
-import highlighterSingleton from './highlighter.js'
-import tryHighlightComponent from './tryHighlightComponent.js'
+import highlighter from './highlighter.js'
 import getApplicableFixes from './getApplicableFixes.js'
 
 export default async function setInspectorState(payload, api, violators, violations, componentInstances) {
-    highlighterSingleton.clear()
+    highlighter.clear()
     
     if (typeof payload.nodeId === 'string') {
         let nodeId
@@ -34,7 +33,7 @@ export default async function setInspectorState(payload, api, violators, violati
 
         const instance = componentInstances.find(instance => instance.uid.toString() === nodeId)
         if (instance) {
-            tryHighlightComponent(highlighterSingleton, instance, api)
+            highlighter.highlightComponent(instance)
             const propsToCheck = ['props', 'setupProps', 'data'].filter(prop => instance.hasOwnProperty(prop))
             const state = {}
 
@@ -60,7 +59,7 @@ export default async function setInspectorState(payload, api, violators, violati
             for (const violatingInstance of violatingInstances) {
                 //api.highlightElement(violatingInstance)
                 console.log('highlight', violatingInstance)
-                highlighterSingleton.highlightComponent(violatingInstance.id)
+                highlighter.highlightComponent(violatingInstance)
             }
         }
     }

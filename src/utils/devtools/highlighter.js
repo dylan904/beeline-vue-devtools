@@ -24,10 +24,19 @@ class HighlighterSingleton {
         this.#create(element, '#00BFFF')
     }
 
-    highlightComponent(componentInstanceId) {
+    performHighlight(componentInstanceId) {
         const element = this.#getComponentElement(componentInstanceId)
         if (element)
             this.#create(element, '#41B883')
+    }
+
+    highlightComponent(componentInstance) {
+        try {
+            //api.highlightElement(componentInstance)
+            highlighter.performHighlight(componentInstance.uid)
+        } catch(err) {
+            console.error('cant highlight, no instance', componentInstance, err)
+        }
     }
 
     clear() {
@@ -45,5 +54,5 @@ class HighlighterSingleton {
     }
 }
 
-const highlighterSingleton = new HighlighterSingleton()
-export default highlighterSingleton
+const highlighter = new HighlighterSingleton()
+export default highlighter
