@@ -1,14 +1,14 @@
 import gitCommitHashs from './gitCommitHashs.js'
-import getComponentFiles from './getComponentFiles.js'
 import commitModifiedFiles from './commitModifiedFiles.js'
 import { promisify } from 'util'
 import { exec } from 'child_process'
+import fromDir from "../general/fromDir.js"
 
 const execPromise = promisify(exec)
 const srcPathRegex = /.*\/src\//
 
 export default async function updateTrackingRepo() { // commit modified files to secondary branch for version reference
-  const componentFiles = getComponentFiles()
+  const componentFiles = await fromDir(process.env.projectRoot + '/src/', /\.vue$/)
   const revisions = {}
   const { newCommitHash, existingCommitFiles, newCommitFiles } = await commitModifiedFiles(componentFiles)
 
