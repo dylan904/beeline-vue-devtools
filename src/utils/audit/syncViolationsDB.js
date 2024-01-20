@@ -70,7 +70,7 @@ async function getUpdatedOps(srcViolations, violations, isPending) {
 
   for (const [vIdx, violation] of srcViolations.entries()) {
     syncViolation(violation, vIdx, violations, isPending, ops, async (component) => {
-      console.log('trysetstate', {wintype: typeof window, component, state: fileDiffersStates[component.file], file: component.file})
+      console.log('trysetstate', {git, wintype: typeof window, component, state: fileDiffersStates[component.file], file: component.file})
       if (!fileDiffersStates.hasOwnProperty(component.file))
         fileDiffersStates[component.file] = await git.fileDiffersFromCommit(component.file, component.commitHash)
 
