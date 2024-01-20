@@ -1,14 +1,13 @@
 import cooler from './cooler.js'
-import serialize from './serialize.js'
+import serialize from '../general/serialize.js'
 import cosmos from './cosmos/index.js'
-import { appendViolations, appendAndProcessViolations } from './appendViolations.js'
+import { appendViolations } from './appendViolations.js'
+import syncViolationsDB from './syncViolationsDB.js'
 
-export default async function scan(router, violations, firstRun) {
+async function scan(router, violations, firstRun) {
   const currentRoute = router?.currentRoute.value
   console.log('scan', currentRoute.name, serialize(currentRoute.query), router)
-  const serializedQuery = serialize(currentRoute.query)
-  const urlKey = serializedQuery ? currentRoute.name + '?' + serializedQuery : currentRoute.name
-
+  
   const result = await axe.run()
   console.log('result violations', JSON.parse(JSON.stringify(result.violations)))
 
@@ -17,54 +16,14 @@ export default async function scan(router, violations, firstRun) {
   const altered = appendViolations(violations, result.violations)
   console.log('mycheck', {altered, violations, 'result.violations': result.violations })
   if (altered) {
-    if (!cosmos.getContainer()) {
-      try {
-        await cosmos.init()
-      } catch (e) {
-        console.error(e)
-        return result
-      }
-    }
-      
     if (import.meta.env.VITE_A11Y_COSMOS_CONNECTION_STRING) {
-      const qResult = {
-        current: (await cosmos.queryViolations(urlKey, false))[0],
-        pending: (await cosmos.queryViolations(urlKey, true))[0]
-      }
-      
-      console.log({'qResult.current': qResult.current, 'qResult.pending': qResult.pending})
+      if (!(await cosmos.init()))
+        return result
 
-      const recordedViolations = {
-        current: qResult.current.violations || [],
-        pending: qResult.pending.violations || []
-      }
-      console.log({currentRecorded: recordedViolations.current, pendingRecorded: recordedViolations.pending, idc: qResult.current.id, idp: qResult.pending.id})
+      const serializedQuery = serialize(currentRoute.query)
+      const urlKey = serializedQuery ? currentRoute.name + '?' + serializedQuery : currentRoute.name
 
-      const { altered, ops } = appendAndProcessViolations(recordedViolations.current, violations, recordedViolations.pending)
-      console.log({altered, ops})
-
-      if (recordedViolations.current.length) {
-        if (ops.current.length) 
-          cosmos.updateViolations(qResult.current.id, ops.current, false)
-      }
-      else {
-        cosmos.updateViolations(qResult.current.id, [{ 
-          "op": "set", 
-          "path": "/violations", 
-          "value": []
-        }])
-      }
-      if (recordedViolations.pending.length) {
-        if (ops.pending.length) 
-          cosmos.updateViolations(qResult.pending.id, ops.pending, true)
-      }
-      else {
-        cosmos.updateViolations(qResult.pending.id, [{ 
-          "op": "set", 
-          "path": "/violations", 
-          "value": []
-        }], true)
-      }
+      syncViolationsDB(violations, urlKey)
     }
 
     if (firstRun) {
@@ -77,4 +36,11 @@ export default async function scan(router, violations, firstRun) {
   }
 
   return result
+}
+
+export default async function auditA11y(compEls, router, violations) {
+  const result = await scan(router, violations, true)
+  violations = result.violations  // set here for parent context
+  
+  return { result, compEls }
 }
