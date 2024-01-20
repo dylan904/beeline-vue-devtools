@@ -10,7 +10,7 @@ class CosmosSingleton {
 
   async init(packageName, packageVersion) {
     try {
-      if (cosmos.getContainer())
+      if (this.getContainer())
         return true
       
       if (!this.database || !this.container) {
