@@ -14,7 +14,7 @@ class CosmosSingleton {
         return true
       
       if (!this.database || !this.container) {
-        const env = import.meta.env || process.env
+        const env = import.meta.env.name ? import.meta.env : process.env
         const { VITE_A11Y_COSMOS_CONNECTION_STRING: cosmosConnectionString } = env
         if (!cosmosConnectionString) {
           throw new Error('No Cosmos DB connection string provided in env variable: VITE_A11Y_COSMOS_CONNECTION_STRING')
