@@ -47,12 +47,12 @@ export default async function syncViolationsDB(violations, urlKey=null) {
 
       const currentOps = [ ...opsFromPending.current, ...opsFromCurrent.current ]
       if (currentOps.length) {
-        //await cosmos.updateViolations(qResultCurrent.id, currentOps)
+        await cosmos.updateViolations(qResultCurrent.id, currentOps)
       }
 
       const pendingOps = [ ...opsFromPending.pending, ...opsFromCurrent.pending ]
       if (pendingOps.length) {
-        //await cosmos.updateViolations(qResultPending.id, pendingOps, true)
+        await cosmos.updateViolations(qResultPending.id, pendingOps, true)
       }
 
       console.log({ currentOps, pendingOps })
