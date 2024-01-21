@@ -1,6 +1,7 @@
 import vOps from "./violationOps.js"
 
 export default async function syncViolation(srcV, srcVIdx, destViolations, isPending, opsObj, updateNodeCheck) {
+    console.log('syncViolation()', srcV)
     if (!srcV.nodes.length)
         return
   
