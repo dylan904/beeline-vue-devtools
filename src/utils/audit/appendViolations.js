@@ -25,7 +25,7 @@ export function appendViolations(targetViolations, srcViolations) {
   return altered
 }
 
-export function appendAndProcessViolations(currentViolations, srcViolations, pendingViolations) {
+export async function appendAndProcessViolations(currentViolations, srcViolations, pendingViolations) {
   const ops = {
     current: [],
     pending: []
@@ -53,7 +53,7 @@ export function appendAndProcessViolations(currentViolations, srcViolations, pen
       newVCopy.nodes = compNodes[type]
       const isPending = type === 'pending'
     
-      syncViolation(newVCopy, srcVIdx, violations[type], isPending, ops, (component) => !!component.commitHash)
+      await syncViolation(newVCopy, srcVIdx, violations[type], isPending, ops, checkComponentHash)
     
       console.log('appendPending', {newVCopy})
     }
@@ -64,4 +64,8 @@ export function appendAndProcessViolations(currentViolations, srcViolations, pen
     altered: !!opCount, 
     ops
   }
+}
+
+function checkComponentHash(component) {
+  return !!component.commitHash
 }
