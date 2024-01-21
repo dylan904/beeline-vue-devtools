@@ -26,7 +26,7 @@ class CosmosSingleton {
         }
 
         if (!thePackage.name || !thePackage.version)
-          console.warn('no package name/version for cosmos instance', thePackage)
+          console.warn('no package name/version for cosmos instance', {thePackage, 'import.meta.env': import.meta.env, 'process.env': process.env})
 
         const client = new CosmosClient(cosmosConnectionString);
         console.log('testmepls', {cosmosString: cosmosConnectionString, thePackage})
