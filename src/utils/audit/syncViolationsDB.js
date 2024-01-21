@@ -2,7 +2,6 @@ import cosmos from './cosmos/index.js'
 import { appendAndProcessViolations } from './appendViolations.js'
 import syncViolation from '../versioning/syncViolation.js'
 
-
 export default async function syncViolationsDB(violations, urlKey=null) {
   const currentQueryResults = await cosmos.queryViolations(urlKey, false)
   const pendingQueryResults = await cosmos.queryViolations(urlKey, true)
@@ -15,9 +14,14 @@ export default async function syncViolationsDB(violations, urlKey=null) {
   for (const qResult of qResults) {
     console.log('sync', {urlKey, qResult})
 
+    if (!qResult.current)
+      qResult.current = await cosmos.createItem(qResult.pending.urlKey, false)
+    else if (!qResult.pending)
+      qResult.pending = await cosmos.createItem(qResult.current.urlKey, true)
+    
     const dbViolations = {
-      current: qResult.current?.violations || [],
-      pending: qResult.pending?.violations || []
+      current: qResult.current.violations || [],
+      pending: qResult.pending.violations || []
     }
     console.log({currentRecorded: dbViolations.current, pendingRecorded: dbViolations.pending, idc: qResult.current.id, idp: qResult.pending.id})
 

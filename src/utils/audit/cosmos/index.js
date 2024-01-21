@@ -1,6 +1,7 @@
 import { CosmosClient } from '@azure/cosmos'
 import queryViolations from './queryViolations.js'
 import updateViolations from './updateViolations.js'
+import createItem from './createItem.js'
 
 class CosmosSingleton {
   constructor() {
@@ -60,6 +61,7 @@ class CosmosSingleton {
 
 CosmosSingleton.prototype.queryViolations = queryViolations
 CosmosSingleton.prototype.updateViolations = updateViolations
+CosmosSingleton.prototype.createItem = createItem
 
 const cosmosSingleton = new CosmosSingleton()
 export default cosmosSingleton

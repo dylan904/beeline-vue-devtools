@@ -1,5 +1,3 @@
-import { v4 as uuidv4 } from 'uuid'
-
 export default async function queryViolations(urlKey, modified=false) {
   let query = 'SELECT c.id, c.violations, c.urlKey FROM c'
   if (urlKey)
@@ -20,12 +18,8 @@ export default async function queryViolations(urlKey, modified=false) {
     }))
   }
   else if (urlKey) {  // page doesn't exist
-    const id = uuidv4()
-    console.log('createContainer', id)
-    const { resource: createdItem } = await container.items.create({ 
-      id, urlKey, violations: []
-    });
-    
+    const { id } = await this.createItem(urlKey, modified)
+
     return [{ id, violations: [] }]
   }
   else return []
