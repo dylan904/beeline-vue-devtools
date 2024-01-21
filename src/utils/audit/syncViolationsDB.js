@@ -13,9 +13,11 @@ export default async function syncViolationsDB(violations, urlKey=null) {
   }))
 
   for (const qResult of qResults) {
+    console.log('sync', {urlKey, qResult})
+
     const dbViolations = {
-      current: qResult.current.violations || [],
-      pending: qResult.pending.violations || []
+      current: qResult.current?.violations || [],
+      pending: qResult.pending?.violations || []
     }
     console.log({currentRecorded: dbViolations.current, pendingRecorded: dbViolations.pending, idc: qResult.current.id, idp: qResult.pending.id})
 
@@ -65,12 +67,14 @@ let git
 
 async function getUpdatedOps(srcViolations, violations, isPending) {
   const ops = { pending: [], current: [] }
+  
   if (typeof window === 'undefined' && !git) {
     console.log('setgit')
     git = (await import('../versioning/git.js')).default
   }
 
   for (const [vIdx, violation] of srcViolations.entries()) {
+    console.log('syncVfrom getUpdatedOps', violation)
     syncViolation(violation, vIdx, violations, isPending, ops, async (component) => {
       console.log('trysetstate', {git, serverSide: typeof window === 'undefined', component, state: fileDiffersStates[component.file], file: component.file})
       if (!fileDiffersStates.hasOwnProperty(component.file))
