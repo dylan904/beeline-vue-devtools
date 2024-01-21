@@ -36,7 +36,7 @@ export default async function syncViolationsDB(violations, urlKey=null) {
           await cosmos.updateViolations(qResult[type].id, [{ 
             "op": "set", 
             "path": "/violations", 
-            "value": []
+            "value": [ ...ops[type] ]
           }], isPending)
         }
       }
