@@ -8,6 +8,8 @@ export default async function syncViolation(srcV, srcVIdx, destViolations, isPen
     const type = isPending ? 'pending' : 'current'
     const ops = opsObj[type]
     const destV = destViolations.find(v => v.id === srcV.id)
+
+    console.log('syncViolation()', {type, destV, ops})
   
     if (destV) {
         const isCurrent = !isPending
@@ -17,6 +19,8 @@ export default async function syncViolation(srcV, srcVIdx, destViolations, isPen
   
         for (const [nIdx, node] of targetNodes.entries()) {
             const component = node.component || {}
+
+            console.log('syncNode', {node, component, type, destV})
 
             if (component.file && component.commitHash) {
                 const shouldUpdate = await updateNodeCheck(component)
