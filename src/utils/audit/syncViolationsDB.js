@@ -26,7 +26,7 @@ export default async function syncViolationsDB(violations, urlKey=null) {
     console.log({currentRecorded: dbViolations.current, pendingRecorded: dbViolations.pending, idc: qResult.current.id, idp: qResult.pending.id})
 
     if (violations) {
-      const { altered, ops } = appendAndProcessViolations(dbViolations, violations)
+      const { altered, ops } = await appendAndProcessViolations(dbViolations, violations)
       console.log({altered, ops})
 
       if (!altered) 
