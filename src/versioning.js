@@ -6,13 +6,24 @@ import getRevisions from './utils/versioning/getRevisions.js'
 import getPackageJSON from './utils/general/getPackageJSON.js'
 
 export async function getA11yConfig(importURL) {
-  if (!(await initGit()))
+  try {
+    await git.init()
+  } catch(err) {
+    console.log(err)
     return {}
+  }
 
-  loadEnvVars()
+  process.env = { ...process.env, ...loadEnv(process.env.NODE_ENV, process.cwd()) }
   
-  const pkg = await getPackageJSON(importURL)
-  const newProcessProps = createEnvProps(pkg, importURL)
+  const packageJSON = await getPackageJSON(importURL)
+  const newProcessProps = {
+    'process.env.project': '"' + packageJSON.name + '"',
+    'process.env.version': '"' + packageJSON.version + '"',
+    'process.env.author': '"' + (await git.getConfigProp('user.email')) + '"',
+    'process.env.AUDITA11Y': process.env.AUDITA11Y || '""',
+    'process.env.projectRoot': '"' + dirname(fileURLToPath(importURL)) + '"',
+    'process.env.VITE_A11Y_COSMOS_CONNECTION_STRING': '"' + process.env.VITE_A11Y_COSMOS_CONNECTION_STRING + '"'
+  }
 
   for (const propKey in newProcessProps) {
     const value = newProcessProps[propKey]
@@ -20,7 +31,7 @@ export async function getA11yConfig(importURL) {
   }
 
   // set revisions after so it can access cosmos string
-  const revisions = await getRevisions(pkg.name, pkg.version)
+  const revisions = await getRevisions(packageJSON.name, packageJSON.version)
   console.log('got revisions', revisions)
   newProcessProps['process.env.revisions'] = revisions
   process.env.revisions = revisions
@@ -42,33 +53,5 @@ export function revisionWatcherVitePlugin() {
         })
       }
     }
-  }
-}
-
-async function initGit() {
-  try {
-    await git.init()
-    return true
-  } catch(err) {
-    console.log(err)
-  }
-}
-
-function loadEnvVars() {
-  process.env = { ...process.env, ...loadEnv(process.env.NODE_ENV, process.cwd()) }
-}
-
-async function createEnvProps(pkg, importURL) {
-  const email = await git.getConfigProp('user.email')
-  const projectRoot = dirname(fileURLToPath(importURL))
-  const env = process.env
-
-  return {
-      'process.env.project': '"' + pkg.name + '"',
-      'process.env.version': '"' + pkg.version + '"',
-      'process.env.author': '"' + email + '"',
-      'process.env.AUDITA11Y': env.AUDITA11Y || '""',
-      'process.env.projectRoot': '"' + projectRoot + '"',
-      'process.env.VITE_A11Y_COSMOS_CONNECTION_STRING': '"' + env.VITE_A11Y_COSMOS_CONNECTION_STRING + '"'
   }
 }
