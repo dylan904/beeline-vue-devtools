@@ -47,12 +47,10 @@ export async function appendAndProcessViolations(dbViolations, violations) {
 
     for (const type of ['current', 'pending']) {
       newVCopy.nodes = compNodes[type]
-      console.log('appendV - set nodes', {type, nodes: compNodes[type]})
+      console.log('appendV - set nodes', {type, nodes: compNodes[type], newVCopy: JSON.parse(JSON.stringify(newVCopy))})
       const isPending = type === 'pending'
     
       await syncViolation(newVCopy, vIdx, dbViolations[type], isPending, ops, checkComponentHash)
-    
-      console.log('appendPending', {newVCopy})
     }
   }
 
