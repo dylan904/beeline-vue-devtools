@@ -1,7 +1,7 @@
 import vOps from "./violationOps.js"
 
 export default async function syncViolation(srcV, srcVIdx, destViolations, isPending, opsObj, updateNodeCheck) {
-    console.log('syncViolation()', srcV)
+    console.log('syncViolation() init', srcV)
     if (!srcV.nodes.length)
         return
   
@@ -9,7 +9,7 @@ export default async function syncViolation(srcV, srcVIdx, destViolations, isPen
     const ops = opsObj[type]
     const destV = destViolations.find(v => v.id === srcV.id)
 
-    console.log('syncViolation()', {type, destV, ops})
+    console.log('syncViolation() check', {type, nodes: JSON.parse(JSON.stringify(srcV.nodes)), destV, ops})
   
     if (destV) {
         const isCurrent = !isPending
