@@ -17,6 +17,7 @@ export default async function getRevisions(packageName, packageVersion) {
 
     await git.stash()
     const currentBranch = await git.forcefullySwitchBranch(a11yBranch)
+    console.log('getRevisions()', { currentBranch })
 
     let revisions
 
