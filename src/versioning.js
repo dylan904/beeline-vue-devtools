@@ -44,14 +44,30 @@ export function revisionWatcherVitePlugin() {
     name: 'beeline-revision-watcher',
     enforce: 'post',
     async handleHotUpdate({ file, server }) {
-      console.log('reloading revisions...', file.endsWith('.vue'), {file});
-      if (file.endsWith('.vue')) {
-        server.ws.send({
-          type: 'custom',
-          event: 'revisions-update',
-          data: await getRevisions()
-        })
+      const isVueFile = file.endsWith('.vue')
+      console.log('reloading revisions...', isVueFile, {file})
+
+      if (isVueFile) {
+        const revisions = await getRevisions()
+        trySend(revisions, tryCt)
       }
     }
+  }
+}
+
+const maxTries = 3
+
+function trySend(revisions, tryCt) {
+  try {
+    server.ws.send({
+      type: 'custom',
+      event: 'revisions-update',
+      data: revisions
+    })
+
+  } catch (error) {
+    console.error({tryCt}, 'Error sending message to server:' + error)
+    if (tryCt < maxTries)
+      setTimeout(trySend.bind(null, revisions, tryCt+1))
   }
 }
