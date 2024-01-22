@@ -27,23 +27,15 @@ export default async function syncViolationsDB(violations, urlKey=null) {
 
     if (violations) {
       const { altered, ops } = await appendAndProcessViolations(dbViolations, violations)
-      console.log({altered, ops})
+      console.log({altered, ops, dbViolations})
 
       if (!altered) 
         continue
 
       for (const type of ['current', 'pending']) {
-        const isPending = type === 'pending'
-        if (dbViolations[type].length) {
-          if (ops[type].length) 
-            await cosmos.updateViolations(qResult[type].id, ops[type], isPending)
-        }
-        else {
-          await cosmos.updateViolations(qResult[type].id, [{ 
-            "op": "set", 
-            "path": "/violations", 
-            "value": [ ...dbViolations[type] ]
-          }], isPending)
+        if (ops[type].length) {
+          const isPending = type === 'pending'
+          await cosmos.updateViolations(qResult[type].id, ops[type], isPending)
         }
       }
     }
@@ -73,7 +65,6 @@ async function getUpdatedOps(srcViolations, violations, isPending) {
   const ops = { pending: [], current: [] }
   
   if (typeof window === 'undefined' && !git) {
-    console.log('setgit')
     git = (await import('../versioning/git.js')).default
   }
 
