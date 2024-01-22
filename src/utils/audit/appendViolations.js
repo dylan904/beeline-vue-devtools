@@ -2,10 +2,10 @@ import filterModifiedComponents from "./filterModifiedComponents.js"
 import copy from "../general/copy.js"
 import syncViolation from "../versioning/syncViolation.js"
 
-export function appendViolations(targetViolations, srcViolations) {
+export function appendViolations(targetViolations, violations) {
   let altered = false
 
-  for (const newV of srcViolations) {
+  for (const newV of violations) {
     const vCopy = copy(newV)
     const targetViolation = targetViolations.find(v => v.id === vCopy.id)
     console.log('appendViolation', {vCopy, targetViolation, targetViolations})
@@ -25,19 +25,15 @@ export function appendViolations(targetViolations, srcViolations) {
   return altered
 }
 
-export async function appendAndProcessViolations(currentViolations, srcViolations, pendingViolations) {
+export async function appendAndProcessViolations(dbViolations, violations) {
   const ops = {
     current: [],
     pending: []
   }
-  const violations = {
-    current: currentViolations,
-    pending: pendingViolations
-  }
 
-  for (const [srcVIdx, newV] of srcViolations.entries()) {
+  for (const [vIdx, newV] of violations.entries()) {
     console.log('appendandprocess 1', {
-      violations: copy(violations), 
+      violations: copy(dbViolations), 
       newV: copy(newV)
     })
 
@@ -51,9 +47,10 @@ export async function appendAndProcessViolations(currentViolations, srcViolation
 
     for (const type of ['current', 'pending']) {
       newVCopy.nodes = compNodes[type]
+      console.log('appendV - set nodes', {type, nodes: compNodes[type]})
       const isPending = type === 'pending'
     
-      await syncViolation(newVCopy, srcVIdx, violations[type], isPending, ops, checkComponentHash)
+      await syncViolation(newVCopy, vIdx, dbViolations[type], isPending, ops, checkComponentHash)
     
       console.log('appendPending', {newVCopy})
     }
