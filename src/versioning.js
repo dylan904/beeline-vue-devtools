@@ -49,9 +49,9 @@ export function revisionWatcherVitePlugin() {
     enforce: 'post',
     async handleHotUpdate({ file, server }) {
       const isVueFile = file.endsWith('.vue')
-      console.log('reloading revisions...', { isVueFile, file })
 
       if (isVueFile && file !== currentFile) {
+        console.log('reloading revisions...', { isVueFile, file })
         currentFile = file
         updateQueue = updateQueue.then(async () => {
           const revisions = await getRevisions()
@@ -61,8 +61,8 @@ export function revisionWatcherVitePlugin() {
               event: 'revisions-update',
               data: revisions
             })
-          } catch (error) {
-            console.error('Error sending message to server:' + error)
+          } catch (err) {
+            console.error('Error sending message to server:' + err)
           } finally {
             currentFile = null
           }
