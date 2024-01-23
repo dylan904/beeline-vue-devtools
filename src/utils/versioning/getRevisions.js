@@ -15,10 +15,11 @@ export default async function getRevisions(packageName, packageVersion) {
         return {}
     }
 
+    console.log('stashme')
     const { error: stashError} = await git.stash()
     if (stashError)
         return {}
-    
+
     const currentBranch = await git.forcefullySwitchBranch(a11yBranch)
     console.log('getRevisions()', { currentBranch })
 
