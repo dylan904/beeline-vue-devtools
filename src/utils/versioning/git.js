@@ -161,7 +161,7 @@ class Git {
         // TODO: find real fix. for now, store staged changes seperately
         this.#setStoredStagedFiles()
 
-        await this.tryExec(`git stash push -m "a11y git.js stash"`)
+        return await this.tryExec(`git stash push -m "a11y git.js stash"`)
     }
     
     async applyStash(n=0) {
