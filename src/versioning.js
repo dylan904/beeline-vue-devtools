@@ -41,6 +41,7 @@ export async function getA11yConfig(importURL) {
 
 
 let updateQueue = Promise.resolve()
+let currentFile = null
 
 export function revisionWatcherVitePlugin() {
   return {
@@ -50,27 +51,23 @@ export function revisionWatcherVitePlugin() {
       const isVueFile = file.endsWith('.vue')
       console.log('reloading revisions...', { isVueFile, file })
 
-      if (isVueFile) {
-        const revisions = await getRevisions()
-        updateQueue = updateQueue.then(() => {
+      if (isVueFile && file !== currentFile) {
+        currentFile = file
+        updateQueue = updateQueue.then(async () => {
+          const revisions = await getRevisions()
           try {
             server.ws.send({
               type: 'custom',
               event: 'revisions-update',
               data: revisions
             })
-        
           } catch (error) {
             console.error('Error sending message to server:' + error)
+          } finally {
+            currentFile = null
           }
         })
       }
     }
   }
-}
-
-const maxTries = 3
-
-function trySend(revisions, tryCt) {
-  
 }
