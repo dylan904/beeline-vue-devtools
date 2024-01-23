@@ -45,7 +45,7 @@ export function revisionWatcherVitePlugin() {
     enforce: 'post',
     async handleHotUpdate({ file, server }) {
       const isVueFile = file.endsWith('.vue')
-      console.log('reloading revisions...', isVueFile, {file})
+      console.log('reloading revisions...', { isVueFile, file })
 
       if (isVueFile) {
         const revisions = await getRevisions()
