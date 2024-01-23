@@ -39,6 +39,9 @@ export async function getA11yConfig(importURL) {
   return newProcessProps
 }
 
+
+let updateQueue = Promise.resolve()
+
 export function revisionWatcherVitePlugin() {
   return {
     name: 'beeline-revision-watcher',
@@ -49,7 +52,18 @@ export function revisionWatcherVitePlugin() {
 
       if (isVueFile) {
         const revisions = await getRevisions()
-        trySend(revisions, tryCt)
+        updateQueue = updateQueue.then(() => {
+          try {
+            server.ws.send({
+              type: 'custom',
+              event: 'revisions-update',
+              data: revisions
+            })
+        
+          } catch (error) {
+            console.error('Error sending message to server:' + error)
+          }
+        })
       }
     }
   }
@@ -58,16 +72,5 @@ export function revisionWatcherVitePlugin() {
 const maxTries = 3
 
 function trySend(revisions, tryCt) {
-  try {
-    server.ws.send({
-      type: 'custom',
-      event: 'revisions-update',
-      data: revisions
-    })
-
-  } catch (error) {
-    console.error({tryCt}, 'Error sending message to server:' + error)
-    if (tryCt < maxTries)
-      setTimeout(trySend.bind(null, revisions, tryCt+1))
-  }
+  
 }
