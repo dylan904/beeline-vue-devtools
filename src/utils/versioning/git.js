@@ -78,10 +78,15 @@ class Git {
     async commitFiles(filePaths, message="File tracking commit", flags=[], ignoreUntracked=false) {
         console.log('commitFiles', filePaths)
         if (filePaths.length) {
-            const fileString = filePaths.map(file => '"' + file + '"').join(' ')
-            await this.add(fileString)
+            if (flags.includes('-a')) {
+                return await this.commit(message, flags, ignoreUntracked)
+            }
+            else {
+                const fileString = filePaths.map(file => '"' + file + '"').join(' ')
+                await this.add(fileString)
 
-            return await this.commit(message, flags, ignoreUntracked)   // return commit hash
+                return await this.commit(message, flags, ignoreUntracked)   // return commit hash
+            }
         }
         return null
     }
