@@ -41,7 +41,6 @@ export async function getA11yConfig(importURL) {
 
 
 let updateQueue = Promise.resolve()
-let currentFile = null
 let lastProcessedTimes = {}
 
 export function revisionWatcherVitePlugin() {
@@ -51,17 +50,9 @@ export function revisionWatcherVitePlugin() {
     async handleHotUpdate({ file, server }) {
       const isVueFile = file.endsWith('.vue')
 
-      console.log('revisioncheck', { isVueFile, file, currentFile })
+      console.log('revisioncheck', { isVueFile, file })
 
-      if (isVueFile && file !== currentFile) {
-        currentFile = file
-
-        const currentTime = Date.now()
-        const lastProcessedTime = lastProcessedTimes[file]
-        const timeSinceLastProcessed = lastProcessedTime ? currentTime - lastProcessedTime : null
-        lastProcessedTimes[file] = currentTime
-
-        console.log('reloading revisions...', { isVueFile, file, currentFile, timeSinceLastProcessed, currentBranch: (await git.getCurrentBranch()) })
+      if (isVueFile) {
 
         updateQueue = updateQueue.then(async () => {
           const revisions = await getRevisions()
@@ -74,7 +65,12 @@ export function revisionWatcherVitePlugin() {
           } catch (err) {
             console.error('Error sending message to server:' + err)
           } finally {
-            currentFile = null
+            const currentTime = Date.now()
+            const lastProcessedTime = lastProcessedTimes[file]
+            const timeSinceLastProcessed = lastProcessedTime ? currentTime - lastProcessedTime : null
+            lastProcessedTimes[file] = currentTime
+
+            console.log('reloaded revisions...', { isVueFile, file, timeSinceLastProcessed, currentBranch: (await git.getCurrentBranch()) })
           }
         })
       }
