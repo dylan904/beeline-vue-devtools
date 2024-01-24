@@ -53,7 +53,7 @@ export function revisionWatcherVitePlugin() {
       console.log('revisioncheck', { isVueFile, file })
 
       if (isVueFile) {
-
+        const queuedTime = Date.now()
         updateQueue = updateQueue.then(async () => {
           const revisions = await getRevisions()
           try {
@@ -65,10 +65,10 @@ export function revisionWatcherVitePlugin() {
           } catch (err) {
             console.error('Error sending message to server:' + err)
           } finally {
-            const currentTime = Date.now()
+            
             const lastProcessedTime = lastProcessedTimes[file]
-            const timeSinceLastProcessed = lastProcessedTime ? currentTime - lastProcessedTime : null
-            lastProcessedTimes[file] = currentTime
+            const timeSinceLastProcessed = lastProcessedTime ? queuedTime - lastProcessedTime : null
+            lastProcessedTimes[file] = queuedTime
 
             console.log('reloaded revisions...', { isVueFile, file, timeSinceLastProcessed, currentBranch: (await git.getCurrentBranch()) })
           }
