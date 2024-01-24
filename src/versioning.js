@@ -49,13 +49,13 @@ export function revisionWatcherVitePlugin() {
     enforce: 'post',
     async handleHotUpdate({ file, server }) {
       const isVueFile = file.endsWith('.vue')
+      const lastProcessedTime = lastProcessedTimes[file]
+      const timeSinceLastProcessed = lastProcessedTime ? Date.now() - lastProcessedTime : null
 
-      console.log('revisioncheck', { isVueFile, file })
+      console.log('revisioncheck', { isVueFile, file, timeSinceLastProcessed })
 
-      if (isVueFile) {
-        const lastProcessedTime = lastProcessedTimes[file]
-        const timeSinceLastProcessed = lastProcessedTime ? Date.now() - lastProcessedTime : null
-        console.log('reloaded revisions...', { isVueFile, file, timeSinceLastProcessed, currentBranch: (await git.getCurrentBranch()) })
+      if (isVueFile && timeSinceLastProcessed < 1000) {
+        console.log('reloading revisions...', { isVueFile, file, currentBranch: (await git.getCurrentBranch()) })
 
         updateQueue = updateQueue.then(async () => {
           const revisions = await getRevisions()
