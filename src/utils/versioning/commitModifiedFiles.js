@@ -23,8 +23,7 @@ export default async function commitModifiedFiles(filePaths) {
   }
 
   const newCommitHash = await git.commitFiles(newCommitFiles, "File tracking commit", ['-u', '-a'], true)
-  if (filePaths.length && !newCommitHash) {
-    console.log('commit fail check', !!filePaths.length, { filePaths })
+  if (newCommitFiles.length && !newCommitHash) {
     throw('commitFiles() failed')
   }
 
