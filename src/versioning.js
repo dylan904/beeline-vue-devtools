@@ -42,6 +42,7 @@ export async function getA11yConfig(importURL) {
 
 let updateQueue = Promise.resolve()
 let currentFile = null
+let lastProcessedTimes = {}
 
 export function revisionWatcherVitePlugin() {
   return {
@@ -53,8 +54,14 @@ export function revisionWatcherVitePlugin() {
       console.log('revisioncheck', { isVueFile, file, currentFile })
 
       if (isVueFile && file !== currentFile) {
-        console.log('reloading revisions...', { isVueFile, file, currentFile, currentBranch: (await git.getCurrentBranch()) })
         currentFile = file
+
+        const currentTime = Date.now()
+        const lastProcessedTime = lastProcessedTimes[file]
+        const timeSinceLastProcessed = lastProcessedTime ? currentTime - lastProcessedTime : null
+        lastProcessedTimes[file] = currentTime
+
+        console.log('reloading revisions...', { isVueFile, file, currentFile, timeSinceLastProcessed, currentBranch: (await git.getCurrentBranch()) })
 
         updateQueue = updateQueue.then(async () => {
           const revisions = await getRevisions()
