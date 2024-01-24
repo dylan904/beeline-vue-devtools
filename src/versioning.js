@@ -67,7 +67,7 @@ export function revisionWatcherVitePlugin() {
           } catch (err) {
             console.error('Error sending message to server:' + err)
           } finally {
-            lastProcessedFiles[file] = { time: Date.now(), pending: false }
+            processedFileStates[file] = false
           }
         })
       }
