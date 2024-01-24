@@ -41,7 +41,7 @@ export async function getA11yConfig(importURL) {
 
 
 let updateQueue = Promise.resolve()
-let lastProcessedFiles = {}
+let processedFileStates = {}
 
 export function revisionWatcherVitePlugin() {
   return {
@@ -49,16 +49,12 @@ export function revisionWatcherVitePlugin() {
     enforce: 'post',
     async handleHotUpdate({ file, server }) {
       const isVueFile = file.endsWith('.vue')
-      const processed = lastProcessedFiles[file]
-      const timeSinceLastProcessed = processed?.time ? Date.now() - processed.time : Infinity
+      const pending = processedFileStates[file]
+      console.log('revisioncheck1', { isVueFile, file, pending })
 
-      console.log('revisioncheck', { isVueFile, file, timeSinceLastProcessed })
-
-      if (isVueFile && timeSinceLastProcessed > 1000 && !processed.pending) {
-        if (!processed)
-          lastProcessedFiles[file] = { pending: true }
-
-        console.log('reloading revisions...', { isVueFile, file, currentBranch: (await git.getCurrentBranch()) })
+      if (isVueFile && !pending) {
+        processedFileStates[file] = true
+        console.log('reloading revisions...', { currentBranch: (await git.getCurrentBranch()) })
 
         updateQueue = updateQueue.then(async () => {
           const revisions = await getRevisions()
