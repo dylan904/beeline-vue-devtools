@@ -20,7 +20,7 @@ Then, after the app is created we have it use our plugin:
 app.use(DevtoolsPlugin)
 ```
 
-Last, at the bottom of the page, add this code block:
+Last, at the bottom of the file, add this code block:
 
 ```js
 if (import.meta.env.DEV && process.env.AUDITA11Y) {
