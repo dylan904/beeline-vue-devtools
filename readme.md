@@ -38,10 +38,9 @@ From your package.json, add one script:
 
 We'll want to pass along a few environment variables for useful context in the auditing process.
 
-Inside your vite config file, import these lines:
+Inside your vite config file, add this line to your imports:
 
 ```js
-import packageJSON from './package.json' assert {type: 'json'}
 import { getA11yConfig, revisionWatcherVitePlugin } from 'beeline-vue-devtools/src/versioning.js'
 ```
 
