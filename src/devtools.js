@@ -1,4 +1,4 @@
-import { ref, watch, nextTick } from 'vue'
+import { ref, watch } from 'vue'
 import devtools from '@vue/devtools'
 import { setupDevtoolsPlugin } from '@vue/devtools-api'
 import auditA11y from './utils/audit/auditA11y.js'
@@ -7,6 +7,7 @@ import getInspectorNodeActions from './utils/devtools/getInspectorNodeActions.js
 import createAxeScript from './utils/audit/createAxeScript.js'
 import setInspectorState from './utils/devtools/setInspectorState.js'
 import setInspectorTree from './utils/devtools/setInspectorTree.js'
+import cooler from './utils/audit/cooler.js'
 
 if (import.meta.hot) {
     import.meta.hot.on('revisions-update', revisions => {
@@ -54,44 +55,39 @@ export const DevtoolsPlugin = {
             app,
         }, async (api) => {
             devtoolsAPI = api
-            const componentInstances = await api.getComponentInstances(app)
-            const relevantComponentInstances = componentInstances.filter(instance => instance.type.__file && instance.subTree.el.nodeType === 1)
-            console.log({componentInstances, relevantComponentInstances})
-            compEls.value = relevantComponentInstances.map(instance => instance.subTree.el)
 
-            nextTick(async () => {
-                const newComponentInstances = await api.getComponentInstances(app)
-                const newRelevantComponentInstances = newComponentInstances.filter(instance => instance.type.__file && instance.subTree.el.nodeType === 1)
-                console.log('try again1', {newComponentInstances, newRelevantComponentInstances})
-            })
+            let checkInterval = setInterval(async () => {
+                const componentInstances = await api.getComponentInstances(app);
+                
+                if (componentInstances.length > 1) {  // Check if more than one componentInstance is found
+                    const relevantComponentInstances = componentInstances.filter(instance => instance.type.__file && instance.subTree.el.nodeType === 1);
+                    console.log('tada', {componentInstances, relevantComponentInstances});
+                    compEls.value = relevantComponentInstances.map(instance => instance.subTree.el);
+                    clearInterval(checkInterval);  // Clear interval once we have our component instances
 
-            setTimeout(async () => {
-                const newComponentInstances = await api.getComponentInstances(app)
-                const newRelevantComponentInstances = newComponentInstances.filter(instance => instance.type.__file && instance.subTree.el.nodeType === 1)
-                console.log('try again2', {newComponentInstances, newRelevantComponentInstances})
-            }, 3000)
+                    api.on.getInspectorTree(async payload => {
+                        if (payload.inspectorId === inspectorId && init) {
+                            await setInspectorTree(payload, api, violatorsRef, violationsRef.value, relevantComponentInstances);
+                        }
+                    });
 
-            api.on.getInspectorTree(async payload => {
-                if (payload.inspectorId === inspectorId && init) {
-                    await setInspectorTree(payload, api, violatorsRef, violationsRef.value, relevantComponentInstances)
+                    api.on.getInspectorState(async payload => {
+                        if (payload.inspectorId === inspectorId) {
+                            await setInspectorState(payload, api, violatorsRef.value, violationsRef.value, componentInstances);
+                        }
+                    });
+
+                    api.addInspector({
+                        id: inspectorId,
+                        label: 'Accessibility inspector',
+                        icon: 'tab_unselected',
+                        treeFilterPlaceholder: 'Search for test...',
+                        noSelectionText: 'Select a node to view details',
+                        actions: getInspectorActions(),
+                        nodeActions: getInspectorNodeActions(api, inspectorId, componentInstances)
+                    });
                 }
-            })
-
-            api.on.getInspectorState(async payload => {
-                if (payload.inspectorId === inspectorId) {
-                    await setInspectorState(payload, api, violatorsRef.value, violationsRef.value, componentInstances)
-                }
-            })
-
-            api.addInspector({
-                id: inspectorId,
-                label: 'Accessibility inspector',
-                icon: 'tab_unselected',
-                treeFilterPlaceholder: 'Search for test...',
-                noSelectionText: 'Select a node to view details',
-                actions: getInspectorActions(),
-                nodeActions: getInspectorNodeActions(api, inspectorId, componentInstances)
-            })
+            }, 250);  // Check every 250ms
         })
     }
 }
