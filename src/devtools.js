@@ -1,4 +1,4 @@
-import { ref, watch } from 'vue'
+import { ref, watch, nextTick } from 'vue'
 import devtools from '@vue/devtools'
 import { setupDevtoolsPlugin } from '@vue/devtools-api'
 import auditA11y from './utils/audit/auditA11y.js'
@@ -59,9 +59,14 @@ export const DevtoolsPlugin = {
             console.log({componentInstances, relevantComponentInstances})
             compEls.value = relevantComponentInstances.map(instance => instance.subTree.el)
 
+            nextTick(async () => {
+                const newComponentInstances = await api.getComponentInstances(app)
+                const newRelevantComponentInstances = newComponentInstances.filter(instance => instance.type.__file && instance.subTree.el.nodeType === 1)
+                console.log('try again1', {newComponentInstances, newRelevantComponentInstances})
+            })
+
             setTimeout(async () => {
                 const newComponentInstances = await api.getComponentInstances(app)
-                console.log('try again1', newComponentInstances)
                 const newRelevantComponentInstances = newComponentInstances.filter(instance => instance.type.__file && instance.subTree.el.nodeType === 1)
                 console.log('try again2', {newComponentInstances, newRelevantComponentInstances})
             }, 3000)
