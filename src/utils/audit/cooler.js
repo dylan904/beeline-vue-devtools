@@ -32,7 +32,7 @@ export default class cooler {
         if (!this.cooling) {
             this.queued = false
             this.cooling = true
-            this.last = new Date().now()
+            this.last = (new Date()).now()
             this.cb(...this.args)
             this.args = []
         }
