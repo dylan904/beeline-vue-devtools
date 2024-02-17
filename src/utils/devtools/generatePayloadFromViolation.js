@@ -66,7 +66,9 @@ export default async function generatePayloadFromViolation(violation, node, viol
     } else {
         const instanceViolations = violatorNode.children.find(v => v.label === 'Instances').children
         const aggViolations = violatorNode.children.find(v => v.label === 'Aggregate').children
-        let existingInstanceViolation = instanceViolations.find(v => Number(v.id.split('-')[2]) === uid)                    
+        let existingInstanceViolation = instanceViolations.find(v => Number(v.id.split('-')[2]) === uid)   
+        
+        console.log('itest', existingInstanceViolation, violation.id, instanceViolation)
 
         if (existingInstanceViolation) {
             const existingUniqueViolation = existingInstanceViolation.children.find(child => child.label === violation.id)
