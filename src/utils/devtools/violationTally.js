@@ -62,6 +62,10 @@ export default class ViolationTally {
         matchingVs.totals[violation.impact] += matchCount
     }
 
+    getComponentInstances() {
+        return this.#componentInstances
+    }
+
     async #getAllComponentViolations() {
         const componentViolations = {}
         

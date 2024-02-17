@@ -4,7 +4,7 @@ export default async function labelOtherImpacts(impactArray, type, vTally) {
     for (const impactItem of impactArray) {
         let impactCounts
         if (type.toLowerCase() === 'component') {
-            console.log('label component impact', impactItem.name, vTally.tally.components)
+            console.log('label component impact', impactItem.name, vTally.tally.components, vTally.getComponentInstances())
             impactCounts = await vTally.getComponentViolations(impactItem.name).totals
         }
         else if (type.toLowerCase() === 'instance')
