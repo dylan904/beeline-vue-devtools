@@ -28,10 +28,11 @@ async function scan(router, violations, firstRun) {
 
     if (firstRun) {
       const auditCooler = new cooler(2000, scan)
-      const mutationsObserver = new MutationObserver(mutations => {
+      const mutationObserver = new MutationObserver(mutations => {
+        console.log('mutationObserver', mutations)
         setTimeout(auditCooler.proxy.call(auditCooler, router, violations), 500)
       })
-      mutationsObserver.observe(document.body, { subtree: true, childList: true, attributes: true })
+      mutationObserver.observe(document.body, { subtree: true, childList: true, attributes: true })
     }
   }
 
