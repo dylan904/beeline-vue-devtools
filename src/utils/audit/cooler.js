@@ -12,7 +12,7 @@ export default class cooler {
     }
 
     get #getIntervalDiff() {
-        return Math.min(new Date().now() - this.last, this.interval)
+        return Math.min(Date.now() - this.last, this.interval)
     }
 
     cooldown() {
@@ -32,7 +32,7 @@ export default class cooler {
         if (!this.cooling) {
             this.queued = false
             this.cooling = true
-            this.last = (new Date()).now()
+            this.last = Date.now()
             this.cb(...this.args)
             this.args = []
         }
