@@ -27,6 +27,8 @@ export default async function setInspectorTree(payload, api, violatorsRef, viola
         }
     }
 
+    console.log({violatorNodes})
+
     const vTally = new ViolationTally()
     await vTally.init(relevantComponentInstances, violations, api)
     labelOtherImpacts(violatorNodes, 'component', vTally)
