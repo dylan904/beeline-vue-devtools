@@ -11,12 +11,15 @@ export default class cooler {
         this.queued = false
     }
 
-    get #getIntervalDiff() {
-        return Math.min(Date.now() - this.last, this.interval)
+    #getIntervalDiff() {
+        if (!this.last)
+            return this.interval;
+        else
+            return Math.min(Date.now() - this.last, this.interval)
     }
 
     cooldown() {
-        const interval = this.last ? this.#getIntervalDiff() : this.interval
+        const interval = this.#getIntervalDiff()
         setTimeout(() => {
             this.cooling = false
             if (this.queued) {
