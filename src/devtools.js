@@ -56,7 +56,7 @@ export const DevtoolsPlugin = {
             devtoolsAPI = api
             const componentInstances = await api.getComponentInstances(app)
             const relevantComponentInstances = componentInstances.filter(instance => instance.type.__file && instance.subTree.el.nodeType === 1)
-            console.log('relevantComponentInstances1', relevantComponentInstances)
+            console.log({componentInstances, relevantComponentInstances})
             compEls.value = relevantComponentInstances.map(instance => instance.subTree.el)
 
             api.on.getInspectorTree(async payload => {
