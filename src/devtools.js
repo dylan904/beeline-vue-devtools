@@ -30,6 +30,7 @@ export async function prepareA11YAudit(router) {
         init = true
         watch(compEls, async els => {
             await auditA11y(els, router, violationsRef.value)
+            console.log()
             if (devtoolsAPI)
                 devtoolsAPI.sendInspectorTree(inspectorId)
         })
@@ -55,6 +56,7 @@ export const DevtoolsPlugin = {
             devtoolsAPI = api
             const componentInstances = await api.getComponentInstances(app)
             const relevantComponentInstances = componentInstances.filter(instance => instance.type.__file && instance.subTree.el.nodeType === 1)
+            console.log('relevantComponentInstances1', relevantComponentInstances)
             compEls.value = relevantComponentInstances.map(instance => instance.subTree.el)
 
             api.on.getInspectorTree(async payload => {
