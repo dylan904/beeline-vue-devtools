@@ -59,10 +59,11 @@ export const DevtoolsPlugin = {
             console.log({componentInstances, relevantComponentInstances})
             compEls.value = relevantComponentInstances.map(instance => instance.subTree.el)
 
-            setTimeout(() => {
-                const newComponentInstances = api.getComponentInstances(app)
+            setTimeout(async () => {
+                const newComponentInstances = await api.getComponentInstances(app)
+                console.log('try again1', newComponentInstances)
                 const newRelevantComponentInstances = newComponentInstances.filter(instance => instance.type.__file && instance.subTree.el.nodeType === 1)
-                console.log('try again', {newComponentInstances, newRelevantComponentInstances})
+                console.log('try again2', {newComponentInstances, newRelevantComponentInstances})
             }, 3000)
 
             api.on.getInspectorTree(async payload => {
