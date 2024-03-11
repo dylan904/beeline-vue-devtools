@@ -78,7 +78,8 @@ function auditColors(rootElement = document.body) {
 
             if (Object.keys(colors.props).length) {
                 //console.log('push', colors)
-                colors.el = generateUniqueSelector(el);
+                //colors.el = generateUniqueSelector(el);
+                colors.el = el;
                 filtered.push(colors);
             }
         }
