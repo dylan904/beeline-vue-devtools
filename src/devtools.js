@@ -7,7 +7,7 @@ import getInspectorNodeActions from './utils/devtools/getInspectorNodeActions.js
 import createAxeScript from './utils/audit/createAxeScript.js'
 import setInspectorState from './utils/devtools/setInspectorState.js'
 import setInspectorTree from './utils/devtools/setInspectorTree.js'
-import cooler from './utils/audit/cooler.js'
+import auditColors from './utils/audit/auditColors.js'
 
 if (import.meta.hot) {
     import.meta.hot.on('revisions-update', revisions => {
@@ -17,7 +17,7 @@ if (import.meta.hot) {
 
 const compEls = ref({ value: [] })
 const violationsRef = ref([])
-const inspectorId = 'bln-a11y'
+const a11yInspectorId = 'bln-a11y'
 let devtoolsAPI
 const violatorsRef = ref([])
 let init = false
@@ -33,7 +33,7 @@ export async function prepareA11YAudit(router) {
             await auditA11y(els, router, violationsRef.value)
             console.log()
             if (devtoolsAPI)
-                devtoolsAPI.sendInspectorTree(inspectorId)
+                devtoolsAPI.sendInspectorTree(a11yInspectorId)
         })
     
         watch(() => router.currentRoute.value,
@@ -41,7 +41,7 @@ export async function prepareA11YAudit(router) {
                 violationsRef.value = []
                 await auditA11y(compEls.value, router, violationsRef.value)
                 if (devtoolsAPI)
-                    devtoolsAPI.sendInspectorTree(inspectorId)
+                    devtoolsAPI.sendInspectorTree(a11yInspectorId)
             }
         )
     }
@@ -56,7 +56,7 @@ export const DevtoolsPlugin = {
         }, async (api) => {
             devtoolsAPI = api
 
-            let checkInterval = setInterval(async () => {
+            const checkInterval = setInterval(async () => {
                 const componentInstances = await api.getComponentInstances(app);
                 
                 if (componentInstances.length > 1) {  // Check if more than one componentInstance is found
@@ -66,28 +66,82 @@ export const DevtoolsPlugin = {
                     clearInterval(checkInterval);  // Clear interval once we have our component instances
 
                     api.on.getInspectorTree(async payload => {
-                        if (payload.inspectorId === inspectorId && init) {
+                        if (payload.inspectorId === a11yInspectorId && init) {
                             await setInspectorTree(payload, api, violatorsRef, violationsRef.value, relevantComponentInstances);
                         }
                     });
+                    
+                    api.on.visitComponentTree(payload => {
+                        console.log('visitComponentTree', payload.inspectorId, payload)
+                        const node = payload.treeNode
+                        if (node.name === 'MyApp') {
+                            node.tags.push({
+                                label: 'root',
+                                textColor: 0x000000,
+                                backgroundColor: 0xFF984F
+                            })
+                        } else {
+                            node.tags.push({
+                                label: 'test',
+                                textColor: 0xFFAAAA,
+                                backgroundColor: 0xFFEEEE,
+                                tooltip: `It's a test!`
+                            })
+                        }
+                      })
 
                     api.on.getInspectorState(async payload => {
-                        if (payload.inspectorId === inspectorId) {
+                        if (payload.inspectorId === a11yInspectorId) {
                             await setInspectorState(payload, api, violatorsRef.value, violationsRef.value, componentInstances);
                         }
                     });
 
                     api.addInspector({
-                        id: inspectorId,
+                        id: a11yInspectorId,
                         label: 'Accessibility inspector',
                         icon: 'tab_unselected',
                         treeFilterPlaceholder: 'Search for test...',
                         noSelectionText: 'Select a node to view details',
                         actions: getInspectorActions(),
-                        nodeActions: getInspectorNodeActions(api, inspectorId, componentInstances)
+                        nodeActions: getInspectorNodeActions(api, a11yInspectorId, componentInstances)
                     });
                 }
             }, 250);  // Check every 250ms
+
+            api.on.visitComponentTree((payload) => {
+                const node = payload.treeNode;
+                const componentInstance = payload.componentInstance;
+                console.log('visitComponentTree', {node, componentInstance});
+                // Assuming you have a way to get the root element of the component
+                const rootElement = componentInstance.$el;
+          
+                if (rootElement) {
+                  const mismatches = auditColors(rootElement);
+                  if (mismatches && mismatches.length > 0) {
+                    node.tags.push({
+                      label: `Color Mismatches (x${mismatches.length})`,
+                      textColor: 0xFFFFFF,
+                      backgroundColor: 0xFF0000,
+                      tooltip: 'This component has color properties outside of the design system.',
+                    });
+                  }
+                }
+              });
+          
+              const mismatchesPane = api.state.createPane('Color Mismatches');
+              api.on.visitComponentTree(({ componentInstance }) => {
+                const rootElement = componentInstance.$el;
+                if (rootElement) {
+                  const mismatches = auditColors(rootElement);
+                  if (mismatches && mismatches.length > 0) {
+                    mismatchesPane.addLog({
+                      componentId: componentInstance.uid,
+                      label: componentInstance.name || 'Anonymous Component',
+                      data: mismatches,
+                    });
+                  }
+                }
+              });
         })
     }
 }
