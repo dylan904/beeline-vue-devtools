@@ -87,44 +87,44 @@ export const DevtoolsPlugin = {
                         actions: getInspectorActions(),
                         nodeActions: getInspectorNodeActions(api, a11yInspectorId, componentInstances)
                     });
+
+                    api.on.visitComponentTree((payload) => {
+                        const node = payload.treeNode;
+                        const componentInstance = payload.componentInstance;
+                        
+                        // Assuming you have a way to get the root element of the component
+                        const rootElement = componentInstance?.ctx.$el;
+                        console.log('visitComponentTree', {node, componentInstance, rootElement});
+                  
+                        if (rootElement) {
+                          const mismatches = auditColors(rootElement);
+                          if (mismatches && mismatches.length > 0) {
+                            node.tags.push({
+                              label: `Color Mismatches (x${mismatches.length})`,
+                              textColor: 0xFFFFFF,
+                              backgroundColor: 0xFF0000,
+                              tooltip: 'This component has color properties outside of the design system.',
+                            });
+                          }
+                        }
+                      });
+        
+                      api.on.inspectComponent(({ componentInstance, instanceData }) => {
+                        const rootElement = componentInstance.ctx.$el;
+                        console.log('inspectComponent', {componentInstance, instanceData, rootElement});
+                        if (instanceData && rootElement) {
+                            const mismatches = auditColors(rootElement);
+                            if (mismatches && mismatches.length > 0) {
+                                instanceData.state.push({
+                                    type: stateType,
+                                    key: 'colorMismatches',
+                                    value: mismatches
+                                })
+                            }
+                        }
+                    })
                 }
             }, 250);  // Check every 250ms
-
-            api.on.visitComponentTree((payload) => {
-                const node = payload.treeNode;
-                const componentInstance = payload.componentInstance;
-                
-                // Assuming you have a way to get the root element of the component
-                const rootElement = node.componentInstance?.$el;
-                console.log('visitComponentTree', {node, componentInstance, rootElement});
-          
-                if (rootElement) {
-                  const mismatches = auditColors(rootElement);
-                  if (mismatches && mismatches.length > 0) {
-                    node.tags.push({
-                      label: `Color Mismatches (x${mismatches.length})`,
-                      textColor: 0xFFFFFF,
-                      backgroundColor: 0xFF0000,
-                      tooltip: 'This component has color properties outside of the design system.',
-                    });
-                  }
-                }
-              });
-
-              api.on.inspectComponent(({ componentInstance, instanceData }) => {
-                const rootElement = componentInstance.$el;
-                console.log('inspectComponent', {componentInstance, instanceData, rootElement});
-                if (instanceData && rootElement) {
-                    const mismatches = auditColors(rootElement);
-                    if (mismatches && mismatches.length > 0) {
-                        instanceData.state.push({
-                            type: stateType,
-                            key: 'colorMismatches',
-                            value: mismatches
-                        })
-                    }
-                }
-            })
         })
     }
 }
