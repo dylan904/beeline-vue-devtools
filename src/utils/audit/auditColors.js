@@ -11,21 +11,16 @@ const palettes = {
     accent: ['#33326B', '#43418C', '#5754B5', '#6F6CE8', '#7A77FF', '#9592FF', '#A6A4FF', '#C2C0FF', '#D6D5FF', '#F2F1FF', '#F4F3FF']
 }
 
-
-
 let toggled = false;
 
-const colors = auditColors();
-console.log('BDS color audit failures:', colors);
-
-document.addEventListener('keyup', (ev) => {
-    toggled = !toggled;
-    const { ctrlKey, shiftKey, key } = ev;
-    if (ctrlKey && shiftKey && key === 'C') {
-        swapColors(colors, toggled);
-        alert(toggled ? 'Closest design system colors applied' : 'Colors reverted');
-    }
-});
+// document.addEventListener('keyup', (ev) => {
+//     toggled = !toggled;
+//     const { ctrlKey, shiftKey, key } = ev;
+//     if (ctrlKey && shiftKey && key === 'C') {
+//         swapColors(colors, toggled);
+//         alert(toggled ? 'Closest design system colors applied' : 'Colors reverted');
+//     }
+// });
 
 function swapColors(colors, toggled) {
     for (const colorData of colors) {
@@ -36,8 +31,8 @@ function swapColors(colors, toggled) {
     }
 }
 
-function auditColors() {
-    const allEls = [...document.querySelectorAll('*')];
+function auditColors(rootElement = document.body) {
+    const allEls = [ rootElement, ...rootElement.querySelectorAll('*') ];
 
     return allEls.reduce((filtered, el) => {
         const colors = { props: {} };

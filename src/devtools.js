@@ -70,27 +70,9 @@ export const DevtoolsPlugin = {
                             await setInspectorTree(payload, api, violatorsRef, violationsRef.value, relevantComponentInstances);
                         }
                     });
-                    
-                    api.on.visitComponentTree(payload => {
-                        console.log('visitComponentTree', payload.inspectorId, payload)
-                        const node = payload.treeNode
-                        if (node.name === 'MyApp') {
-                            node.tags.push({
-                                label: 'root',
-                                textColor: 0x000000,
-                                backgroundColor: 0xFF984F
-                            })
-                        } else {
-                            node.tags.push({
-                                label: 'test',
-                                textColor: 0xFFAAAA,
-                                backgroundColor: 0xFFEEEE,
-                                tooltip: `It's a test!`
-                            })
-                        }
-                      })
 
                     api.on.getInspectorState(async payload => {
+                        console.log('getInspectorState', payload);
                         if (payload.inspectorId === a11yInspectorId) {
                             await setInspectorState(payload, api, violatorsRef.value, violationsRef.value, componentInstances);
                         }
@@ -111,9 +93,10 @@ export const DevtoolsPlugin = {
             api.on.visitComponentTree((payload) => {
                 const node = payload.treeNode;
                 const componentInstance = payload.componentInstance;
-                console.log('visitComponentTree', {node, componentInstance});
+                
                 // Assuming you have a way to get the root element of the component
-                const rootElement = componentInstance.$el;
+                const rootElement = node.componentInstance?.$el;
+                console.log('visitComponentTree', {node, componentInstance, rootElement});
           
                 if (rootElement) {
                   const mismatches = auditColors(rootElement);
@@ -127,21 +110,21 @@ export const DevtoolsPlugin = {
                   }
                 }
               });
-          
-              const mismatchesPane = api.state.createPane('Color Mismatches');
-              api.on.visitComponentTree(({ componentInstance }) => {
+
+              api.on.inspectComponent(({ componentInstance, instanceData }) => {
                 const rootElement = componentInstance.$el;
-                if (rootElement) {
-                  const mismatches = auditColors(rootElement);
-                  if (mismatches && mismatches.length > 0) {
-                    mismatchesPane.addLog({
-                      componentId: componentInstance.uid,
-                      label: componentInstance.name || 'Anonymous Component',
-                      data: mismatches,
-                    });
-                  }
+                console.log('inspectComponent', {componentInstance, instanceData, rootElement});
+                if (instanceData && rootElement) {
+                    const mismatches = auditColors(rootElement);
+                    if (mismatches && mismatches.length > 0) {
+                        instanceData.state.push({
+                            type: stateType,
+                            key: 'colorMismatches',
+                            value: mismatches
+                        })
+                    }
                 }
-              });
+            })
         })
     }
 }
