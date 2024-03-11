@@ -114,9 +114,10 @@ export const DevtoolsPlugin = {
                         console.log('inspectComponent', {componentInstance, instanceData, rootElement});
                         if (instanceData && rootElement) {
                             const mismatches = auditColors(rootElement);
+                            console.log('inspectComponent mismatches', mismatches);
                             if (mismatches && mismatches.length > 0) {
                                 instanceData.state.push({
-                                    type: stateType,
+                                    type: 'color-audit',
                                     key: 'colorMismatches',
                                     value: mismatches
                                 })

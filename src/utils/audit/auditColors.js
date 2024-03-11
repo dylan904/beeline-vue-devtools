@@ -69,7 +69,7 @@ function auditColors(rootElement = document.body) {
 
             if (Object.keys(colors.props).length) {
                 //console.log('push', colors)
-                colors.el = el;
+                colors.el = generateUniqueSelector(el);
                 filtered.push(colors);
             }
         }
@@ -77,6 +77,31 @@ function auditColors(rootElement = document.body) {
         return filtered;
     }, []);
 }
+
+function generateUniqueSelector(el) {
+    if (!el || !el.parentElement) {
+      return null;
+    }
+  
+    const parts = [];
+    while (el && el.nodeType === Node.ELEMENT_NODE) {
+      let selector = el.nodeName.toLowerCase();
+      if (el.id) {
+        selector += '#' + el.id;
+        parts.unshift(selector);
+        break; // An ID should be unique, so we can stop.
+      } else {
+        let sib = el, nth = 1;
+        while (sib = sib.previousElementSibling) {
+          if (sib.nodeName.toLowerCase() == selector) nth++;
+        }
+        if (nth != 1) selector += `:nth-child(${nth})`;
+      }
+      parts.unshift(selector);
+      el = el.parentElement;
+    }
+    return parts.join(' > ');
+  }
 
 function applyAlphaToColor(hex, alpha) {
     hex = hex.replace('#', '');
