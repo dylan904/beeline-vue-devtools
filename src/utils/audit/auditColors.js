@@ -44,7 +44,10 @@ function auditColors(rootElement = document.body) {
                 const hex = rgbToHex(styles.backgroundColor);
                 const rgba = parseRgbString(styles.backgroundColor);
                 if (!colorInPalette(hex)) {
-                    colors.props.backgroundColor = { existing: { color: styles.backgroundColor, hex }, suggested: getClosestPaletteColor(hex, rgba.a) }
+                    colors.props.backgroundColor = { 
+                        existing: { color: styles.backgroundColor, hex }, 
+                        suggested: getClosestPaletteColor(hex, rgba.a) 
+                    }
                 }
             }
 
@@ -53,7 +56,10 @@ function auditColors(rootElement = document.body) {
                 const hex = rgbToHex(styles.borderColor);
                 const rgba = parseRgbString(styles.borderColor);
                 if (!colorInPalette(hex)) {
-                    colors.props.borderColor = { existing: { color: styles.borderColor, hex }, suggested: getClosestPaletteColor(hex, rgba.a) }
+                    colors.props.borderColor = { 
+                        existing: { color: styles.borderColor, hex }, 
+                        suggested: getClosestPaletteColor(hex, rgba.a) 
+                    }
                 }
             }
 
@@ -63,7 +69,10 @@ function auditColors(rootElement = document.body) {
                 //console.log('textmatch', colorInPalette(hex), hex)
                 const rgba = parseRgbString(styles.color);
                 if (!colorInPalette(hex)) {
-                    colors.props.color = { existing: { color: styles.color, hex }, suggested: getClosestPaletteColor(hex, rgba.a) }
+                    colors.props.color = { 
+                        existing: { color: styles.color, hex }, 
+                        suggested: getClosestPaletteColor(hex, rgba.a) 
+                    }
                 }
             }
 
@@ -200,15 +209,17 @@ function colorInPalette(color) {
     return false;
 }
 
+const indexMap = ['0', '10', '20', '30', '40', '50', '60', '70', '80', '90', '95', '99']
+
 function getClosestPaletteColor(color, alpha) {
     let closest;
 
     for (const type in palettes) {
-        for (const pColor of palettes[type]) {
+        for (const [index, pColor] of palettes[type].entries()) {
             const delta = getColorDiff(color, pColor);
             if (!closest || delta < closest.delta) {
                 const adjustedColor = (alpha && alpha !== '0') ? applyAlphaToColor(pColor, alpha) : pColor;
-                closest = { delta: delta, hex: pColor, color: adjustedColor, palette: type }
+                closest = { delta: delta, hex: pColor, color: adjustedColor, palette: type, variable: `$bds-${type}-${indexMap[index]}` }
             }
         }
     }
